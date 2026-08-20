@@ -310,9 +310,22 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
 .fotowrap canvas#fotoCv{width:100%;height:auto;display:block;touch-action:none;cursor:crosshair}
 .loupe{position:absolute;top:8px;right:8px;width:118px;height:118px;border-radius:50%;
   border:2.5px solid var(--surface-1);box-shadow:var(--sh-2);background:#fff;pointer-events:none;z-index:3}
-.camang{position:absolute;left:0;right:0;bottom:0;padding:9px 12px;color:#fff;
-  background:linear-gradient(0deg,rgba(0,0,0,.62),transparent);font-size:26px;font-weight:800;
-  font-variant-numeric:tabular-nums;text-align:center;letter-spacing:-.02em}
+.camang{position:absolute;left:0;right:0;top:0;padding:10px 12px 16px;color:#fff;
+  background:linear-gradient(180deg,rgba(0,0,0,.62),transparent);font-size:28px;font-weight:800;
+  font-variant-numeric:tabular-nums;text-align:center;letter-spacing:-.02em;
+  text-shadow:0 1px 4px rgba(0,0,0,.5)}
+/* i due comandi stanno DENTRO il fotogramma: si registra senza staccare
+   gli occhi dal mirino, che è il momento in cui si perde la mira */
+.camctl{position:absolute;left:0;right:0;bottom:0;display:flex;gap:9px;padding:12px 11px 13px;
+  background:linear-gradient(0deg,rgba(0,0,0,.6),transparent)}
+.camctl button{flex:1 1 0;min-width:0;border:1.5px solid rgba(255,255,255,.35);border-radius:11px;
+  padding:13px 8px;font-family:inherit;font-size:12.5px;font-weight:700;color:#fff;letter-spacing:.02em;
+  background:rgba(15,45,34,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.4);transition:background .15s,transform .1s}
+.camctl button b{display:block;font-size:15.5px;font-weight:900;letter-spacing:.06em;margin-top:2px}
+.camctl button:active{transform:translateY(1px)}
+.camctl button.done{background:rgba(26,127,75,.86);border-color:rgba(255,255,255,.6)}
+.camctl button.done:before{content:"✓ ";font-weight:900}
 
 /* ============================================================
    ANIMAZIONI — il simbolo dondola sulla sua base, gli alberi

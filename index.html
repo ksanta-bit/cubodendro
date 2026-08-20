@@ -310,9 +310,22 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
 .fotowrap canvas#fotoCv{width:100%;height:auto;display:block;touch-action:none;cursor:crosshair}
 .loupe{position:absolute;top:8px;right:8px;width:118px;height:118px;border-radius:50%;
   border:2.5px solid var(--surface-1);box-shadow:var(--sh-2);background:#fff;pointer-events:none;z-index:3}
-.camang{position:absolute;left:0;right:0;bottom:0;padding:9px 12px;color:#fff;
-  background:linear-gradient(0deg,rgba(0,0,0,.62),transparent);font-size:26px;font-weight:800;
-  font-variant-numeric:tabular-nums;text-align:center;letter-spacing:-.02em}
+.camang{position:absolute;left:0;right:0;top:0;padding:10px 12px 16px;color:#fff;
+  background:linear-gradient(180deg,rgba(0,0,0,.62),transparent);font-size:28px;font-weight:800;
+  font-variant-numeric:tabular-nums;text-align:center;letter-spacing:-.02em;
+  text-shadow:0 1px 4px rgba(0,0,0,.5)}
+/* i due comandi stanno DENTRO il fotogramma: si registra senza staccare
+   gli occhi dal mirino, che è il momento in cui si perde la mira */
+.camctl{position:absolute;left:0;right:0;bottom:0;display:flex;gap:9px;padding:12px 11px 13px;
+  background:linear-gradient(0deg,rgba(0,0,0,.6),transparent)}
+.camctl button{flex:1 1 0;min-width:0;border:1.5px solid rgba(255,255,255,.35);border-radius:11px;
+  padding:13px 8px;font-family:inherit;font-size:12.5px;font-weight:700;color:#fff;letter-spacing:.02em;
+  background:rgba(15,45,34,.72);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.4);transition:background .15s,transform .1s}
+.camctl button b{display:block;font-size:15.5px;font-weight:900;letter-spacing:.06em;margin-top:2px}
+.camctl button:active{transform:translateY(1px)}
+.camctl button.done{background:rgba(26,127,75,.86);border-color:rgba(255,255,255,.6)}
+.camctl button.done:before{content:"✓ ";font-weight:900}
 
 /* ============================================================
    ANIMAZIONI — il simbolo dondola sulla sua base, gli alberi
@@ -1066,6 +1079,14 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
       <div class="row" style="margin-top:8px">
         <button class="danger" id="ipsHardReset">↺ Reset completo dell'inclinometro</button>
       </div>
+      <div class="note" style="background:var(--surface-2);border-left-color:var(--amber)">
+        <b>Lo stesso sensore fa due mestieri.</b> Tenuto in mano e puntato, misura l'<b>altezza</b> degli
+        alberi. Appoggiato disteso a terra, misura la <b>pendenza del suolo</b>.
+        <div class="row" style="margin-top:8px">
+          <button class="ghost" data-vai="ipsCard2">↓ Vai alla misura dell'altezza</button>
+          <button class="ghost" data-vai="ipsCardPend">↓ Vai alla pendenza del suolo</button>
+        </div>
+      </div>
       <div class="note">Il <b>reset completo</b> rimette tutto come all'accensione: azzeramento di fabbrica,
         filtro svuotato, angoli di base e cima cancellati. Usalo quando la lettura è impazzita, quando passi
         il telefono a un altro allievo, o quando non sei più sicuro di che cosa hai azzerato.</div>
@@ -1135,17 +1156,34 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
     <div class="camwrap" id="camWrap" hidden>
       <video id="camVideo" playsinline muted autoplay></video>
       <svg class="camover" viewBox="0 0 300 400" preserveAspectRatio="none">
-        <line x1="150" y1="0" x2="150" y2="400" stroke="#fff" stroke-opacity=".45" stroke-width="1"/>
-        <line x1="0" y1="200" x2="300" y2="200" stroke="#fff" stroke-opacity=".45" stroke-width="1"/>
-        <line x1="120" y1="200" x2="180" y2="200" stroke="#ffd34d" stroke-width="2.5"/>
-        <line x1="150" y1="180" x2="150" y2="220" stroke="#ffd34d" stroke-width="2.5"/>
-        <circle cx="150" cy="200" r="3" fill="#ffd34d"/>
+        <line x1="150" y1="0" x2="150" y2="400" stroke="#fff" stroke-opacity=".18" stroke-width="1"/>
+        <line x1="0" y1="200" x2="300" y2="200" stroke="#fff" stroke-opacity=".18" stroke-width="1"/>
+        <!-- contorno scuro: tiene leggibile il rosso anche contro il cielo -->
+        <g stroke="#000" stroke-opacity=".38" stroke-width="5.4" stroke-linecap="round" fill="none">
+          <line x1="26" y1="200" x2="122" y2="200"/><line x1="178" y1="200" x2="274" y2="200"/>
+          <line x1="150" y1="72" x2="150" y2="172"/><line x1="150" y1="228" x2="150" y2="328"/>
+          <circle cx="150" cy="200" r="17"/>
+        </g>
+        <g stroke="#ff2d20" stroke-width="2.8" stroke-linecap="round" fill="none">
+          <line x1="26" y1="200" x2="122" y2="200"/><line x1="178" y1="200" x2="274" y2="200"/>
+          <line x1="150" y1="72" x2="150" y2="172"/><line x1="150" y1="228" x2="150" y2="328"/>
+          <circle cx="150" cy="200" r="17"/>
+          <line x1="60" y1="192" x2="60" y2="208"/><line x1="240" y1="192" x2="240" y2="208"/>
+          <line x1="142" y1="110" x2="158" y2="110"/><line x1="142" y1="290" x2="158" y2="290"/>
+        </g>
+        <circle cx="150" cy="200" r="2.6" fill="#ff2d20" stroke="#000" stroke-opacity=".35" stroke-width="1.2"/>
       </svg>
       <div class="camang" id="camAng">0,0°</div>
+      <div class="camctl">
+        <button id="camRecB" type="button">Registra <b>BASE</b></button>
+        <button id="camRecC" type="button">Registra <b>CIMA</b></button>
+      </div>
     </div>
-    <div class="note">Porta il punto da misurare sulla <b>crocetta gialla</b>, poi tocca «Registra» qui sotto.
-      Mirare guardando lo schermo è più preciso che mirare lungo il bordo del telefono, e permette di
-      controllare di aver preso davvero la cima e non un ramo del verticillo alto.</div>
+    <div class="note">Porta il punto da misurare dentro il <b>cerchietto rosso di collimazione</b>, poi tocca
+      «Registra BASE» o «Registra CIMA» <b>senza staccare gli occhi dallo schermo</b>: i due pulsanti sono
+      dentro il fotogramma apposta, per non doverli cercare più in basso e perdere la mira. Mirare guardando
+      lo schermo è più preciso che mirare lungo il bordo del telefono, e permette di controllare di aver preso
+      davvero la cima e non un ramo del verticillo alto.</div>
 
     <div class="steps">
       <div class="step" id="stepB">
@@ -1182,15 +1220,39 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
 
   <!-- ---------------- 3 · pendenza ---------------- -->
   <div class="card" id="ipsCardPend" hidden>
-    <h2>3 · Pendenza del versante</h2>
-    <p>Appoggia il telefono <b>disteso sul terreno</b>, schermo verso l'alto, e tocca «Misura». L'app legge
-      l'inclinazione del piano su cui il telefono è appoggiato: è la pendenza del versante in quel punto,
-      qualunque sia il verso in cui hai orientato il telefono.</p>
+    <h2>3 · Pendenza del suolo — clisimetro</h2>
+    <p>Il telefono, appoggiato disteso, funziona da <b>clisimetro</b>: misura di quanto è inclinato il piano
+      su cui sta. Non serve orientarlo in una direzione precisa — l'app calcola l'inclinazione del piano nel
+      suo complesso, che è la pendenza del versante in quel punto.</p>
 
-    <div class="note">Il suolo del bosco non è un piano: sassi, radici e lettiera falsano la lettura di
-      parecchi gradi. Appoggia il telefono su qualcosa di <b>rigido e lungo</b> — una tavoletta, il retro di
-      una cartellina, un bastone da trekking disteso lungo la linea di massima pendenza. Fai tre letture in
-      punti diversi e usa la media: è quello che si fa anche con il clisimetro.</div>
+    <h3>Come si fa, passo per passo</h3>
+    <ol class="proto">
+      <li><b>Trova la linea di massima pendenza.</b> È la direzione in cui l'acqua scenderebbe: guarda dove
+        scorrerebbe, o lascia rotolare una pigna. Non è quella in cui stai camminando, che di solito taglia
+        il versante in diagonale.</li>
+      <li><b>Metti giù qualcosa di rigido</b> lungo quella linea: una tavoletta, il retro della cartellina
+        portablocco, un bastone da trekking. <b>Non appoggiare il telefono direttamente sulla lettiera</b>:
+        una foglia sotto un angolo sposta la lettura di cinque gradi.</li>
+      <li><b>Posa il telefono disteso</b> sopra, schermo verso l'alto, e togli la mano. Deve stare fermo da
+        solo: se lo tieni, misuri la tua mano.</li>
+      <li><b>Tocca «Misura la pendenza»</b> e aspetta un secondo senza toccare niente. L'app raccoglie le
+        letture di quel secondo e ne prende la mediana.</li>
+      <li><b>Ripeti in tre punti diversi</b> dentro l'area di saggio — centro e due lati. L'app tiene tutte
+        le letture e ne fa la media, e ti avvisa se differiscono troppo fra loro.</li>
+    </ol>
+
+    <div class="note"><b>Perché tre letture e non una.</b> Il suolo del bosco non è un piano: sassi, radici,
+      ceppaie e microavvallamenti fanno variare l'inclinazione locale anche di dieci gradi su un metro. Quello
+      che interessa a noi è la pendenza <i>della stazione</i>, non quella del sasso su cui hai appoggiato il
+      telefono. La media di tre letture ben distanziate è il compromesso che si usa anche col clisimetro
+      Suunto in dendrometria.</div>
+
+    <div class="note" style="background:var(--warn-soft);border-left-color:var(--warn)">
+      <b>Se il terreno è troppo accidentato per appoggiarlo</b>, c'è l'alternativa classica: tieni il
+      telefono <i>di taglio</i> in mano e usa l'inclinometro della scheda 1 mirando a un compagno, all'altezza
+      dei tuoi stessi occhi, fermo più a monte o più a valle lungo la linea di massima pendenza. L'angolo che
+      leggi è la pendenza del versante. È il metodo del clisimetro ottico, e in bosco fitto spesso è più
+      rapido.</div>
 
     <div class="row" style="margin-top:10px">
       <button class="act" id="pendGo">Misura la pendenza</button>
@@ -1212,7 +1274,7 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
       <div id="pendWarn"></div>
     </div>
 
-    <figure class="figbox"><svg class="fig" viewBox="0 0 460 250" role="img" aria-label="Il telefono appoggiato sul pendio misura l'angolo del versante" xmlns="http://www.w3.org/2000/svg"><defs><marker id="pk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--text-primary)"/></marker><marker id="pg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--brand)"/></marker></defs><path d="M 40 200 L 400 90 L 400 200 Z" fill="var(--brand)" opacity=".10"/><line x1="40" y1="200" x2="400" y2="90" stroke="var(--wood)" stroke-width="3"/><line x1="40" y1="200" x2="412" y2="200" stroke="var(--line-strong)" stroke-width="1.8" stroke-dasharray="6 4"/><path d="M 114 178 A 76 76 0 0 0 116 200" fill="none" stroke="var(--brand)" stroke-width="2"/><text x="130" y="192" font-size="13" fill="var(--brand)" font-weight="800">β</text><g transform="translate(232 129) rotate(-16.9)"><rect x="-36" y="-10" width="72" height="14" rx="4" fill="var(--brand)"/><rect x="-31" y="-7" width="62" height="8" rx="2" fill="var(--surface-1)" opacity=".9"/></g><line x1="40" y1="226" x2="400" y2="226" stroke="var(--text-primary)" stroke-width="1.6" marker-end="url(#pk)" marker-start="url(#pk)"/><text x="220" y="242" text-anchor="middle" font-size="11" fill="var(--text-primary)" font-weight="800">D = S · cos β</text><line x1="52" y1="193" x2="390" y2="90" stroke="var(--brand)" stroke-width="1.6" marker-end="url(#pg)" marker-start="url(#pg)" opacity=".8"/><text x="215" y="126" text-anchor="middle" font-size="11" fill="var(--brand)" font-weight="800" transform="rotate(-16.9 215 126)">S</text></svg><figcaption><b>Perché serve la pendenza.</b> La cordella tesa fra te e l'albero, su un versante, non misura la distanza orizzontale <i>D</i> ma quella inclinata <i>S</i>, che è sempre più lunga. Usare <i>S</i> al posto di <i>D</i> gonfia l'altezza: a 20° di pendenza l'errore è del 6%, a 30° del 15%. Il telefono appoggiato sul pendio misura β, e da lì <i>D</i> = <i>S</i> · cos β. La stessa correzione serve per delimitare l'area di saggio: un cerchio di 13 m di raggio, su un versante a 25°, si traccia stendendo la cordella a 14,3 m lungo il pendio.</figcaption></figure>
+    <figure class="figbox"><svg class="fig" viewBox="0 0 460 250" role="img" aria-label="Il telefono appoggiato sul pendio misura l'angolo del versante" xmlns="http://www.w3.org/2000/svg"><defs><marker id="pk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--text-primary)"/></marker><marker id="pg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--brand)"/></marker></defs><path d="M 40 200 L 400 90 L 400 200 Z" fill="var(--brand)" opacity=".10"/><line x1="40" y1="200" x2="400" y2="90" stroke="var(--wood)" stroke-width="3"/><line x1="40" y1="200" x2="412" y2="200" stroke="var(--line-strong)" stroke-width="1.8" stroke-dasharray="6 4"/><path d="M 114 178 A 76 76 0 0 0 116 200" fill="none" stroke="var(--brand)" stroke-width="2"/><text x="130" y="192" font-size="13" fill="var(--brand)" font-weight="800">β</text><g transform="translate(232 129) rotate(-16.9)"><rect x="-36" y="-10" width="72" height="14" rx="4" fill="var(--brand)"/><rect x="-31" y="-7" width="62" height="8" rx="2" fill="var(--surface-1)" opacity=".9"/></g><line x1="40" y1="226" x2="400" y2="226" stroke="var(--text-primary)" stroke-width="1.6" marker-end="url(#pk)" marker-start="url(#pk)"/><text x="220" y="242" text-anchor="middle" font-size="11" fill="var(--text-primary)" font-weight="800">D = S · cos β</text><line x1="52" y1="193" x2="390" y2="90" stroke="var(--brand)" stroke-width="1.6" marker-end="url(#pg)" marker-start="url(#pg)" opacity=".8"/><text x="215" y="126" text-anchor="middle" font-size="11" fill="var(--brand)" font-weight="800" transform="rotate(-16.9 215 126)">S</text></svg><figcaption><b>Perché serve la pendenza.</b> La cordella tesa fra te e l'albero, su un versante, non misura la distanza orizzontale <i>D</i> ma quella inclinata <i>S</i>, che è sempre più lunga. Usare <i>S</i> al posto di <i>D</i> gonfia l'altezza: a 20° di pendenza l'errore è del 6%, a 30° del 15%. Il telefono appoggiato sul pendio misura β, e da lì <i>D</i> = <i>S</i> · cos β. La stessa correzione serve per delimitare l'area di saggio: un cerchio di 13 m di raggio, su un versante a 25°, si traccia stendendo la cordella a 14,3 m lungo il pendio. Nel disegno il telefono è appoggiato su una tavoletta distesa lungo la linea di massima pendenza: è così che va messo.</figcaption></figure>
   </div>
 
   <!-- ---------------- 4 · storico ---------------- -->
@@ -1716,7 +1778,7 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
   <div class="card">
     <h2>Crediti, fonti e licenze</h2>
     <div class="credits">
-      <p><b>CuboDendro</b> — versione 3.3<br>
+      <p><b>CuboDendro</b> — versione 3.4<br>
         Ideazione e sviluppo: <b>prof. Gianluca Simonetti</b><br>
         Dirigente scolastico: <b>dott.ssa Roberta Gasparini</b><br>
         Realizzata per l'<b>Istituto di Istruzione Superiore «8 Marzo – K. Lorenz»</b> di Mirano (VE),
@@ -2195,8 +2257,10 @@ function ipsRegistra(quale){
      isolati e senza il ritardo che avrebbe il valore filtrato */
   const camp = finestra(IPS.buf,1000);
   const v = (camp.length>=5 ? mediana(camp) : (IPS.ang===null?0:IPS.ang)) - IPS.off;
-  if(quale==='base'){ IPS.base=v; $('valB').textContent = fmt(v,1)+'°'; $('stepB').classList.add('done'); }
-  else             { IPS.cima=v; $('valC').textContent = fmt(v,1)+'°'; $('stepC').classList.add('done'); }
+  if(quale==='base'){ IPS.base=v; $('valB').textContent = fmt(v,1)+'°'; $('stepB').classList.add('done');
+                      if($('camRecB')) $('camRecB').classList.add('done'); }
+  else             { IPS.cima=v; $('valC').textContent = fmt(v,1)+'°'; $('stepC').classList.add('done');
+                      if($('camRecC')) $('camRecC').classList.add('done'); }
   ipsCalcola();
 }
 
@@ -2352,6 +2416,17 @@ function ipsRenderHist(){
 $('ipsStart').addEventListener('click', ipsAttiva);
 $('ipsRecB').addEventListener('click', function(){ ipsRegistra('base'); });
 $('ipsRecC').addEventListener('click', function(){ ipsRegistra('cima'); });
+$('camRecB').addEventListener('click', function(){ ipsRegistra('base'); });
+$('camRecC').addEventListener('click', function(){ ipsRegistra('cima'); });
+
+/* scorciatoie «vai a…»: le schede dell'ipsometro sono lunghe e la
+   pendenza, che sta in fondo, altrimenti non si trova */
+document.querySelectorAll('[data-vai]').forEach(function(b){
+  b.addEventListener('click', function(){
+    const el = $(b.dataset.vai);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+});
 ['ipsD','ipsLb','ipsLc'].forEach(function(id){ $(id).addEventListener('input', ipsCalcola); });
 
 $('ipsSmorz').addEventListener('change', function(){
@@ -2378,6 +2453,8 @@ $('ipsHardReset').addEventListener('click', function(){
   IPS.base=null; IPS.cima=null; IPS.last=null;
   $('valB').textContent='—'; $('valC').textContent='—';
   $('stepB').classList.remove('done'); $('stepC').classList.remove('done');
+  if($('camRecB')) $('camRecB').classList.remove('done');
+  if($('camRecC')) $('camRecC').classList.remove('done');
   $('ipsOut').hidden=true;
   $('ipsAng').textContent='0,0°'; $('ipsStab').textContent='—'; $('ipsStab').style.color='';
   ipsRender();
@@ -2420,6 +2497,8 @@ $('ipsReset').addEventListener('click', function(){
   IPS.base=null; IPS.cima=null; IPS.last=null;
   $('valB').textContent='—'; $('valC').textContent='—';
   $('stepB').classList.remove('done'); $('stepC').classList.remove('done');
+  if($('camRecB')) $('camRecB').classList.remove('done');
+  if($('camRecC')) $('camRecC').classList.remove('done');
   $('ipsOut').hidden=true; $('ipsAlbero').value='';
 });
 $('ipsSave').addEventListener('click', function(){

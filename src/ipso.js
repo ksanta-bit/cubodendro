@@ -186,8 +186,10 @@ function ipsRegistra(quale){
      isolati e senza il ritardo che avrebbe il valore filtrato */
   const camp = finestra(IPS.buf,1000);
   const v = (camp.length>=5 ? mediana(camp) : (IPS.ang===null?0:IPS.ang)) - IPS.off;
-  if(quale==='base'){ IPS.base=v; $('valB').textContent = fmt(v,1)+'°'; $('stepB').classList.add('done'); }
-  else             { IPS.cima=v; $('valC').textContent = fmt(v,1)+'°'; $('stepC').classList.add('done'); }
+  if(quale==='base'){ IPS.base=v; $('valB').textContent = fmt(v,1)+'°'; $('stepB').classList.add('done');
+                      if($('camRecB')) $('camRecB').classList.add('done'); }
+  else             { IPS.cima=v; $('valC').textContent = fmt(v,1)+'°'; $('stepC').classList.add('done');
+                      if($('camRecC')) $('camRecC').classList.add('done'); }
   ipsCalcola();
 }
 
@@ -343,6 +345,17 @@ function ipsRenderHist(){
 $('ipsStart').addEventListener('click', ipsAttiva);
 $('ipsRecB').addEventListener('click', function(){ ipsRegistra('base'); });
 $('ipsRecC').addEventListener('click', function(){ ipsRegistra('cima'); });
+$('camRecB').addEventListener('click', function(){ ipsRegistra('base'); });
+$('camRecC').addEventListener('click', function(){ ipsRegistra('cima'); });
+
+/* scorciatoie «vai a…»: le schede dell'ipsometro sono lunghe e la
+   pendenza, che sta in fondo, altrimenti non si trova */
+document.querySelectorAll('[data-vai]').forEach(function(b){
+  b.addEventListener('click', function(){
+    const el = $(b.dataset.vai);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+});
 ['ipsD','ipsLb','ipsLc'].forEach(function(id){ $(id).addEventListener('input', ipsCalcola); });
 
 $('ipsSmorz').addEventListener('change', function(){
@@ -369,6 +382,8 @@ $('ipsHardReset').addEventListener('click', function(){
   IPS.base=null; IPS.cima=null; IPS.last=null;
   $('valB').textContent='—'; $('valC').textContent='—';
   $('stepB').classList.remove('done'); $('stepC').classList.remove('done');
+  if($('camRecB')) $('camRecB').classList.remove('done');
+  if($('camRecC')) $('camRecC').classList.remove('done');
   $('ipsOut').hidden=true;
   $('ipsAng').textContent='0,0°'; $('ipsStab').textContent='—'; $('ipsStab').style.color='';
   ipsRender();
@@ -411,6 +426,8 @@ $('ipsReset').addEventListener('click', function(){
   IPS.base=null; IPS.cima=null; IPS.last=null;
   $('valB').textContent='—'; $('valC').textContent='—';
   $('stepB').classList.remove('done'); $('stepC').classList.remove('done');
+  if($('camRecB')) $('camRecB').classList.remove('done');
+  if($('camRecC')) $('camRecC').classList.remove('done');
   $('ipsOut').hidden=true; $('ipsAlbero').value='';
 });
 $('ipsSave').addEventListener('click', function(){
