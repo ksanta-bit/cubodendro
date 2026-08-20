@@ -1,0 +1,61 @@
+CuboDendro
+Applicazione didattica di dendrometria, ipsometria, posizionamento
+satellitare e dendrocronologia.
+
+Copyright (c) 2026 Gianluca Simonetti
+Istituto di Istruzione Superiore «8 Marzo – K. Lorenz», Mirano (VE)
+
+Quest'opera è distribuita con licenza
+Creative Commons Attribuzione - Non commerciale - Condividi allo stesso
+modo 4.0 Internazionale (CC BY-NC-SA 4.0).
+
+Testo completo della licenza:
+https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode.it
+Sintesi leggibile:
+https://creativecommons.org/licenses/by-nc-sa/4.0/deed.it
+
+In sintesi, sei libero di:
+
+  CONDIVIDERE  riprodurre, distribuire, comunicare al pubblico, esporre
+               in pubblico, rappresentare, eseguire e recitare questo
+               materiale con qualsiasi mezzo e formato;
+  MODIFICARE   remixare, trasformare il materiale e basarti su di esso
+               per le tue opere.
+
+Alle seguenti condizioni:
+
+  ATTRIBUZIONE            devi riconoscere una menzione di paternità
+                          adeguata — «CuboDendro, di Gianluca Simonetti,
+                          I.I.S. 8 Marzo – K. Lorenz, Mirano (VE)» —
+                          fornire un link alla licenza e indicare se sono
+                          state effettuate delle modifiche.
+  NON COMMERCIALE         non puoi utilizzare il materiale per scopi
+                          commerciali.
+  STESSA LICENZA          se remixi, trasformi il materiale o ti basi su
+                          di esso, devi distribuire i tuoi contributi con
+                          la stessa licenza del materiale originario.
+
+Non puoi applicare termini legali o misure tecnologiche che impongano ad
+altri soggetti dei vincoli giuridici su quanto la licenza consente loro
+di fare.
+
+--------------------------------------------------------------------
+MATERIALI DI TERZI INCORPORATI
+
+Le equazioni di volume provengono da: Tabacchi G., Di Cosmo L.,
+Gasparini P., Morelli S. (2011), «Stima del volume e della fitomassa
+delle principali specie forestali italiane», CRA-MPF, Trento.
+Sono formule scientifiche pubblicate, non soggette a copyright in quanto
+tali; la fonte è citata per correttezza scientifica.
+
+I dati climatici derivano dalla rianalisi ERA5-Land (Copernicus Climate
+Change Service) resi disponibili tramite Open-Meteo con licenza
+CC BY 4.0. Attribuzione riportata nell'applicazione.
+
+Lo sfondo cartografico facoltativo usa le tessere di OpenStreetMap,
+© contributori OpenStreetMap, licenza ODbL. L'attribuzione è mostrata
+nella mappa. La funzione è disattivata per impostazione predefinita.
+
+Il marchio e il logo dell'Istituto «8 Marzo – K. Lorenz» restano di
+proprietà dell'Istituto e non sono coperti da questa licenza: il loro
+uso è autorizzato limitatamente a questa applicazione.
