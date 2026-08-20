@@ -19,7 +19,7 @@ function ok(k,v){ out.push((v?'  ok  ':'  KO  ')+k); return v; }
   // --- home
   ok('home visibile all\'avvio', await p.locator('#tab-home').isVisible());
   ok('cubatura nascosta all\'avvio', !(await p.locator('#tab-cub').isVisible()));
-  ok('11 riquadri caratteristica', await p.locator('.feat-c').count()===11);
+  ok('12 riquadri caratteristica', await p.locator('.feat-c').count()===12);
   ok('scena con simbolo che dondola', await p.locator('#tab-home .dondolo').count()===1);
   ok('alberi animati nella scena', await p.locator('#tab-home .sway1, #tab-home .sway2').count()>4);
 

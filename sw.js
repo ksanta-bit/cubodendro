@@ -4,7 +4,7 @@
    installata non effettua alcuna richiesta di rete per funzionare.
    Le mattonelle cartografiche di OpenStreetMap, facoltative, sono di
    altra origine e vengono deliberatamente escluse dalla cache. */
-const CACHE = 'cubodendro-v3.2.0';
+const CACHE = 'cubodendro-v3.3.0';
 const SHELL = [
   './',
   './index.html',

@@ -38,9 +38,21 @@ function camSpegni(){
 if($('camOn')) $('camOn').addEventListener('change',function(){
   if(this.checked) camAccendi(); else camSpegni();
 });
-/* spegni la fotocamera quando si lascia la scheda o l'app va in secondo piano */
+/* spegni la fotocamera quando l'app va in secondo piano */
 document.addEventListener('visibilitychange',function(){ if(document.hidden) { camSpegni();
   if($('camOn')) $('camOn').checked=false; } });
+
+/* la fotocamera resta accesa solo mentre sei sulla scheda Altezza:
+   consuma batteria e non ha senso altrove */
+document.querySelectorAll('nav button').forEach(function(b){
+  b.addEventListener('click',function(){
+    if(b.dataset.tab==='ips'){
+      if($('camOn') && $('camOn').checked && typeof IPS!=='undefined' && IPS.on && !camStream) camAccendi();
+    } else if(camStream){
+      camSpegni();
+    }
+  });
+});
 
 /* ---------------- 2 · misura su fotografia ---------------- */
 const FOTO = {

@@ -1,5 +1,7 @@
 <!-- ============ IPSOMETRO ============ -->
 <section id="tab-ips" hidden>
+
+  <!-- ---------------- 1 · sensore ---------------- -->
   <div class="card">
     <h2>1 · Sensore di inclinazione</h2>
     <div id="ipsGate">
@@ -22,20 +24,92 @@
         <div class="tile"><div class="k">Stabilità</div><div class="v" id="ipsStab">—</div></div>
         <div class="tile"><div class="k">Correzione zero</div><div class="v" id="ipsOff">0,0°</div><div class="u">gradi</div></div>
       </div>
-      <div class="row" style="margin-top:8px">
-        <button class="ghost" id="ipsZero">⊙ Azzera sull'orizzonte</button>
-        <button class="ghost" id="ipsZeroRes">Ripristina zero</button>
+
+      <div style="margin-top:12px">
+        <label for="ipsSmorz">Smorzamento della lettura</label>
+        <select id="ipsSmorz">
+          <option value="0.28">Reattivo — segue subito, ma balla</option>
+          <option value="0.10">Normale — buon compromesso</option>
+          <option value="0.035" selected>Stabile — il numero si muove piano (consigliato in bosco)</option>
+          <option value="0.012">Bloccato — quasi immobile, per mani poco ferme</option>
+        </select>
+        <div class="note">Se il numero salta troppo, scendi di un gradino. Lo smorzamento non cambia il valore
+          medio: rallenta solo il modo in cui l'angolo insegue i tuoi movimenti, come la bolla smorzata di una
+          livella professionale. In ogni caso, quando tocchi «Registra» l'app non prende l'istante: prende la
+          <b>mediana dell'ultimo secondo</b> di letture, che è molto più robusta di un singolo campione.</div>
       </div>
-      <div class="note">Per azzerare: appoggia il telefono di taglio su una superficie che sai essere
-        orizzontale (un davanzale, il piano di un tavolo) con la fotocamera che guarda avanti, e tocca
+
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" id="ipsZero">⊙ Azzera sull'orizzonte</button>
+        <button class="ghost" id="ipsZeroRes">Ripristina zero di fabbrica</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="danger" id="ipsHardReset">↺ Reset completo dell'inclinometro</button>
+      </div>
+      <div class="note">Il <b>reset completo</b> rimette tutto come all'accensione: azzeramento di fabbrica,
+        filtro svuotato, angoli di base e cima cancellati. Usalo quando la lettura è impazzita, quando passi
+        il telefono a un altro allievo, o quando non sei più sicuro di che cosa hai azzerato.</div>
+      <div class="note">Per azzerare sull'orizzonte: appoggia il telefono di taglio su una superficie che sai
+        essere orizzontale (un davanzale, il piano di un tavolo) con la fotocamera che guarda avanti, e tocca
         «Azzera sull'orizzonte». Serve a compensare il piccolo scostamento di fabbrica del sensore.</div>
     </div>
   </div>
 
-  <div class="card" id="ipsCardCam" hidden>
-    <h2>Mirino con la fotocamera</h2>
+  <!-- ---------------- 2 · misura ---------------- -->
+  <div class="card" id="ipsCard2" hidden>
+    <h2>2 · Misura dell'altezza</h2>
+
+    <div style="margin-bottom:12px">
+      <label for="ipsMetodo">Metodo di calcolo</label>
+      <select id="ipsMetodo">
+        <option value="sin" selected>Seni — distanze inclinate alla base e alla cima</option>
+        <option value="tan">Tangenti — distanza orizzontale</option>
+      </select>
+    </div>
+
+    <div id="ipsInSin">
+      <div class="grid g2">
+        <div><label for="ipsLb">Distanza inclinata occhio → base (m)</label>
+          <input id="ipsLb" class="big-in" type="number" inputmode="decimal" step="0.1" value="20"></div>
+        <div><label for="ipsLc">Distanza inclinata occhio → cima (m)</label>
+          <input id="ipsLc" class="big-in" type="number" inputmode="decimal" step="0.1" placeholder="vuoto = la ricavo io"></div>
+      </div>
+      <div class="note">Con un <b>telemetro laser</b> misura tutte e due le distanze inclinate: il risultato è
+        esatto anche se la pianta è inclinata o se la cima non sta sopra la base. Con la sola <b>cordella</b>
+        misura la distanza alla base e lascia vuota quella alla cima: l'app la ricava supponendo la cima sulla
+        verticale della base, e nel risultato ti scrive che l'ha fatto.</div>
+    </div>
+
+    <div id="ipsInTan" hidden>
+      <label for="ipsD">Distanza orizzontale dall'albero (m)</label>
+      <input id="ipsD" class="big-in" type="number" inputmode="decimal" step="0.1" value="20">
+      <div class="note">La distanza va misurata <b>in orizzontale</b>, non lungo il pendio. Se il terreno è in
+        pendenza, misura la pendenza nella scheda 3 e usa il convertitore qui sotto.</div>
+    </div>
+
+    <details style="margin-top:10px">
+      <summary>Ho misurato lungo il pendio — converti in orizzontale</summary>
+      <div class="grid g2" style="margin-top:8px">
+        <div><label for="ipsS">Distanza misurata sul terreno S (m)</label>
+          <input id="ipsS" type="number" inputmode="decimal" step="0.1" placeholder="es. 21,5"></div>
+        <div><label for="ipsBeta">Pendenza del terreno β (°)</label>
+          <input id="ipsBeta" type="number" inputmode="decimal" step="0.5" placeholder="dalla scheda 3"></div>
+      </div>
+      <p class="eqn">D = S · cos β</p>
+      <div class="row" style="margin-top:6px">
+        <button class="ghost" id="ipsConv">Calcola e usa questa distanza</button>
+      </div>
+      <div id="ipsConvOut" class="note" hidden></div>
+    </details>
+
+    <div style="margin-top:10px">
+      <label for="ipsAlbero">Riferimento albero (facoltativo)</label>
+      <input id="ipsAlbero" type="text" placeholder="es. AdS 1 · n. 7">
+    </div>
+
+    <h3 style="margin-top:16px">Mirino</h3>
     <div class="maptools">
-      <label class="switch"><input type="checkbox" id="camOn"><span></span>Usa la fotocamera per mirare</label>
+      <label class="switch"><input type="checkbox" id="camOn" checked><span></span>Mira guardando lo schermo</label>
     </div>
     <div id="camErr" class="warnbox" hidden></div>
     <div class="camwrap" id="camWrap" hidden>
@@ -49,19 +123,10 @@
       </svg>
       <div class="camang" id="camAng">0,0°</div>
     </div>
-    <div class="note">Inquadra il punto da misurare e portalo sulla <b>crocetta gialla</b>, poi tocca
-      «Registra» qui sopra. Mirare guardando lo schermo è più preciso che mirare lungo il bordo del telefono,
-      e permette di controllare di aver preso davvero la cima e non un ramo.</div>
-  </div>
+    <div class="note">Porta il punto da misurare sulla <b>crocetta gialla</b>, poi tocca «Registra» qui sotto.
+      Mirare guardando lo schermo è più preciso che mirare lungo il bordo del telefono, e permette di
+      controllare di aver preso davvero la cima e non un ramo del verticillo alto.</div>
 
-  <div class="card" id="ipsCard2" hidden>
-    <h2>2 · Misura dell'altezza</h2>
-    <div class="grid g2">
-      <div><label for="ipsD">Distanza orizzontale dall'albero (m)</label>
-        <input id="ipsD" class="big-in" type="number" inputmode="decimal" step="0.1" value="20"></div>
-      <div><label for="ipsAlbero">Riferimento albero (facoltativo)</label>
-        <input id="ipsAlbero" type="text" placeholder="es. AdS 1 · n. 7"></div>
-    </div>
     <div class="steps">
       <div class="step" id="stepB">
         <div class="step-n">1</div>
@@ -95,8 +160,44 @@
     </div>
   </div>
 
+  <!-- ---------------- 3 · pendenza ---------------- -->
+  <div class="card" id="ipsCardPend" hidden>
+    <h2>3 · Pendenza del versante</h2>
+    <p>Appoggia il telefono <b>disteso sul terreno</b>, schermo verso l'alto, e tocca «Misura». L'app legge
+      l'inclinazione del piano su cui il telefono è appoggiato: è la pendenza del versante in quel punto,
+      qualunque sia il verso in cui hai orientato il telefono.</p>
+
+    <div class="note">Il suolo del bosco non è un piano: sassi, radici e lettiera falsano la lettura di
+      parecchi gradi. Appoggia il telefono su qualcosa di <b>rigido e lungo</b> — una tavoletta, il retro di
+      una cartellina, un bastone da trekking disteso lungo la linea di massima pendenza. Fai tre letture in
+      punti diversi e usa la media: è quello che si fa anche con il clisimetro.</div>
+
+    <div class="row" style="margin-top:10px">
+      <button class="act" id="pendGo">Misura la pendenza</button>
+      <button class="ghost" id="pendClr">Azzera letture</button>
+    </div>
+    <div id="pendCount" class="muted" style="margin-top:8px">Nessuna lettura.</div>
+
+    <div id="pendOut" hidden>
+      <div class="result" style="margin-top:12px">
+        <div class="result-k">Pendenza del versante</div>
+        <div class="result-v"><span id="pendDeg">—</span> <small>°</small></div>
+        <div class="result-e"><span id="pendPct">—</span>% di pendenza &nbsp;·&nbsp; media di <span id="pendN">0</span> letture</div>
+      </div>
+      <div class="scroll"><table class="nums" id="pendTab"></table></div>
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" id="pendUse">↑ Usa nella correzione di distanza</button>
+        <button class="ghost" id="pendRaggio">Raggio dell'area di saggio in pendenza</button>
+      </div>
+      <div id="pendWarn"></div>
+    </div>
+
+    <figure class="figbox"><svg class="fig" viewBox="0 0 460 250" role="img" aria-label="Il telefono appoggiato sul pendio misura l'angolo del versante" xmlns="http://www.w3.org/2000/svg"><defs><marker id="pk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--text-primary)"/></marker><marker id="pg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--brand)"/></marker></defs><path d="M 40 200 L 400 90 L 400 200 Z" fill="var(--brand)" opacity=".10"/><line x1="40" y1="200" x2="400" y2="90" stroke="var(--wood)" stroke-width="3"/><line x1="40" y1="200" x2="412" y2="200" stroke="var(--line-strong)" stroke-width="1.8" stroke-dasharray="6 4"/><path d="M 114 178 A 76 76 0 0 0 116 200" fill="none" stroke="var(--brand)" stroke-width="2"/><text x="130" y="192" font-size="13" fill="var(--brand)" font-weight="800">β</text><g transform="translate(232 129) rotate(-16.9)"><rect x="-36" y="-10" width="72" height="14" rx="4" fill="var(--brand)"/><rect x="-31" y="-7" width="62" height="8" rx="2" fill="var(--surface-1)" opacity=".9"/></g><line x1="40" y1="226" x2="400" y2="226" stroke="var(--text-primary)" stroke-width="1.6" marker-end="url(#pk)" marker-start="url(#pk)"/><text x="220" y="242" text-anchor="middle" font-size="11" fill="var(--text-primary)" font-weight="800">D = S · cos β</text><line x1="52" y1="193" x2="390" y2="90" stroke="var(--brand)" stroke-width="1.6" marker-end="url(#pg)" marker-start="url(#pg)" opacity=".8"/><text x="215" y="126" text-anchor="middle" font-size="11" fill="var(--brand)" font-weight="800" transform="rotate(-16.9 215 126)">S</text></svg><figcaption><b>Perché serve la pendenza.</b> La cordella tesa fra te e l'albero, su un versante, non misura la distanza orizzontale <i>D</i> ma quella inclinata <i>S</i>, che è sempre più lunga. Usare <i>S</i> al posto di <i>D</i> gonfia l'altezza: a 20° di pendenza l'errore è del 6%, a 30° del 15%. Il telefono appoggiato sul pendio misura β, e da lì <i>D</i> = <i>S</i> · cos β. La stessa correzione serve per delimitare l'area di saggio: un cerchio di 13 m di raggio, su un versante a 25°, si traccia stendendo la cordella a 14,3 m lungo il pendio.</figcaption></figure>
+  </div>
+
+  <!-- ---------------- 4 · storico ---------------- -->
   <div class="card" id="ipsCard3" hidden>
-    <h2>3 · Storico delle misure</h2>
+    <h2>4 · Storico delle misure</h2>
     <div class="scroll"><table class="nums" id="ipsTab"></table></div>
     <div class="row" style="margin-top:10px">
       <button class="ghost" id="ipsExp">⬇ Esporta CSV</button>
@@ -104,35 +205,70 @@
     </div>
   </div>
 
+  <!-- ---------------- teoria ---------------- -->
   <div class="card">
-    <h2>Come funziona — e perché due angoli</h2>
+    <h2>La teoria — seni e tangenti</h2>
+
+    <h3>Il metodo dei seni</h3>
+    <p>Se conosci la <b>distanza inclinata</b> dall'occhio al punto che stai mirando, la quota di quel punto
+      rispetto all'occhio è immediata: è il cateto verticale di un triangolo rettangolo la cui ipotenusa è
+      quella distanza.</p>
+    <p class="eqn">h = L<sub>cima</sub> · sin α<sub>cima</sub> − L<sub>base</sub> · sin α<sub>base</sub></p>
+    <p>Gli angoli sono <b>con segno</b>: positivi sopra l'orizzonte, negativi sotto. Se la base sta più in
+      basso dei tuoi occhi, α<sub>base</sub> è negativo, il secondo termine cambia segno e i due contributi
+      si sommano invece di sottrarsi.</p>
+    <p>Il pregio di questa formula è che <b>non assume nulla su dove si trovi la cima</b>. Ogni punto viene
+      collocato nello spazio per conto proprio, con la sua distanza e il suo angolo. Vale per una pianta
+      inclinata, per una latifoglia con la chioma spanciata da un lato, per un albero di cui la cima è
+      spostata di metri rispetto al piede.</p>
+
+    <h3>Il metodo delle tangenti</h3>
     <p class="eqn">h = D · ( tan α<sub>cima</sub> − tan α<sub>base</sub> )</p>
-    <p>Gli angoli sono <b>con segno</b>: positivi sopra l'orizzonte, negativi sotto. Se la base dell'albero
-      sta più in basso dei tuoi occhi, α<sub>base</sub> è negativo e il suo contributo si somma.</p>
-    <p>Il metodo a <b>due angoli</b> è più forte di quello a un angolo solo perché non richiede di sapere a
-      che altezza tieni il telefono: l'altezza dell'occhio si semplifica da sola nella sottrazione. È il
-      principio dell'ipsometro Blume-Leiss e del Vertex, gli strumenti professionali.</p>
+    <p>Qui la distanza orizzontale <i>D</i> è una sola, e viene usata sia per la cima sia per la base. Dietro
+      c'è un'ipotesi precisa: <b>la cima sta sulla verticale della base</b>. In un abete rosso filato in
+      fustaia è quasi vero. In un larice inclinato sul pendio, o in un faggio con la cima spostata di tre
+      metri verso valle, non lo è affatto — e l'errore arriva al 10–15%, sempre nella stessa direzione:
+      sovrastima se la cima pende verso di te, sottostima se pende dall'altra parte.</p>
+    <p>Le due formule sono la stessa cosa quando l'ipotesi è vera: sostituendo L = D / cos α in quella dei
+      seni si ottiene esattamente quella delle tangenti. Non sono due teorie diverse, è la stessa geometria
+      guardata da due punti di vista.</p>
 
+    <figure class="figbox"><svg class="fig" viewBox="0 0 470 300" role="img" aria-label="Confronto fra metodo dei seni e metodo delle tangenti su una pianta inclinata" xmlns="http://www.w3.org/2000/svg"><defs><marker id="sk" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--text-primary)"/></marker></defs><line x1="24" y1="252" x2="452" y2="252" stroke="var(--line-strong)" stroke-width="2"/><path d="M 352 252 L 344 160 L 322 62 L 334 62 L 358 160 L 364 252 Z" fill="var(--wood)" opacity=".8"/><path d="M 292 118 L 328 58 L 364 118 Z" fill="var(--brand)" opacity=".4"/><path d="M 286 168 L 334 104 L 382 168 Z" fill="var(--brand)" opacity=".4"/><path d="M 280 220 L 344 150 L 408 220 Z" fill="var(--brand)" opacity=".4"/><line x1="70" y1="214" x2="440" y2="214" stroke="var(--line-strong)" stroke-width="1.4" stroke-dasharray="6 4"/><line x1="70" y1="214" x2="328" y2="58" stroke="var(--series-2)" stroke-width="2.4"/><line x1="70" y1="214" x2="352" y2="252" stroke="var(--series-1)" stroke-width="2.4"/><circle cx="70" cy="214" r="5.5" fill="var(--text-primary)"/><text x="60" y="204" text-anchor="end" font-size="10" fill="var(--text-primary)" font-weight="700">occhio</text><text x="188" y="122" text-anchor="middle" font-size="11" fill="var(--series-2)" font-weight="800" transform="rotate(-31 188 122)">L cima</text><text x="214" y="250" text-anchor="middle" font-size="11" fill="var(--series-1)" font-weight="800" transform="rotate(7.7 214 250)">L base</text><line x1="328" y1="58" x2="328" y2="270" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="4 3"/><circle cx="328" cy="58" r="4.5" fill="var(--bad)"/><circle cx="352" cy="252" r="4.5" fill="var(--brand)"/><line x1="328" y1="280" x2="352" y2="280" stroke="var(--bad)" stroke-width="2.5"/><text x="340" y="296" text-anchor="middle" font-size="10" fill="var(--bad)" font-weight="800">scarto</text><line x1="70" y1="30" x2="352" y2="30" stroke="var(--text-primary)" stroke-width="1.5" marker-end="url(#sk)" marker-start="url(#sk)"/><text x="211" y="24" text-anchor="middle" font-size="11" fill="var(--text-primary)" font-weight="800">D — orizzontale fino alla BASE</text></svg><figcaption><b>Dove le due formule si separano.</b> La pianta è inclinata: la cima (punto rosso) non sta sopra la base (punto verde), c'è uno <span class="cOut">scarto</span> orizzontale fra le due verticali. Il metodo delle tangenti usa la stessa <i>D</i> per tutti e due i punti, quindi colloca la cima sulla verticale sbagliata e restituisce un'altezza falsa. Il metodo dei seni usa per ogni punto la sua distanza inclinata, e non sbaglia. Con la sola cordella misuri bene <i>L base</i>; per <i>L cima</i> serve un telemetro laser — è per questo che gli ipsometri seri, dal Vertex in avanti, misurano la distanza e non solo l'angolo.</figcaption></figure>
 
-  <figure class="figbox"><svg class="fig" viewBox="0 0 460 280" role="img" aria-label="Schema dell'ipsometro trigonometrico a due angoli" xmlns="http://www.w3.org/2000/svg"><defs><marker id="ak" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--text-primary)"/></marker><marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--series-2)"/></marker><marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--series-1)"/></marker><marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--brand)"/></marker></defs><line x1="26" y1="222" x2="434" y2="222" stroke="var(--line-strong)" stroke-width="2"/><rect x="342" y="66" width="16" height="156" fill="var(--wood)" opacity=".85"/><path d="M 314 112 L 350 58 L 386 112 Z" fill="var(--brand)" opacity=".45"/><path d="M 304 158 L 350 104 L 396 158 Z" fill="var(--brand)" opacity=".45"/><path d="M 294 206 L 350 152 L 406 206 Z" fill="var(--brand)" opacity=".45"/><line x1="66" y1="182" x2="402" y2="182" stroke="var(--line-strong)" stroke-width="1.5" stroke-dasharray="6 4"/><line x1="66" y1="182" x2="350" y2="20" stroke="var(--series-2)" stroke-width="2.2"/><line x1="66" y1="182" x2="350" y2="222" stroke="var(--series-1)" stroke-width="2.2"/><path d="M 124 182 A 58 58 0 0 0 120.5 162.3" fill="none" stroke="var(--series-2)" stroke-width="1.8"/><text x="140.0" y="160.0" text-anchor="start" font-size="11" fill="var(--series-2)" font-weight="800">α cima</text><path d="M 108 182 A 42 42 0 0 1 107.2 190.2" fill="none" stroke="var(--series-1)" stroke-width="1.8"/><text x="124.0" y="206.0" text-anchor="start" font-size="11" fill="var(--series-1)" font-weight="800">α base</text><circle cx="66" cy="182" r="5.5" fill="var(--text-primary)"/><text x="56.0" y="172.0" text-anchor="end" font-size="10" fill="var(--text-primary)" font-weight="700">occhio</text><line x1="66.0" y1="250.0" x2="350.0" y2="250.0" stroke="var(--text-primary)" stroke-width="1.8" marker-end="url(#ak)" marker-start="url(#ak)"/><text x="208.0" y="266.0" text-anchor="middle" font-size="11" fill="var(--text-primary)" font-weight="800">D — distanza orizzontale</text><rect x="20" y="16" width="250" height="30" rx="7" fill="var(--brand)" fill-opacity=".12"/><text x="32.0" y="36.0" text-anchor="start" font-size="13" fill="var(--brand)" font-weight="800">h = D · ( tan α cima − tan α base )</text></svg><figcaption><b>Perché servono due angoli e non uno.</b> Gli angoli sono <b>con segno</b>: positivo sopra l'orizzonte, negativo sotto. Se la base dell'albero sta più in basso dei tuoi occhi, il suo contributo si somma invece di sottrarsi. Il vantaggio del doppio angolo è che <b>l'altezza a cui tieni il telefono si semplifica da sola</b>: non devi misurarla né stimarla. È il principio degli ipsometri professionali Blume-Leiss e Vertex. La distanza D va misurata in orizzontale e conviene sia almeno pari all'altezza presunta: più ti avvicini, più un errore di mezzo grado diventa metri.</figcaption></figure>
+    <h3>Perché i seni reggono meglio gli angoli ripidi</h3>
+    <p>C'è una seconda ragione, più sottile, per preferire i seni: <b>come si propaga l'errore di mira</b>.
+      Deriva le due formule rispetto all'angolo e guarda che cosa moltiplica l'errore Δα:</p>
+    <p class="eqn">seni: L · cos α · Δα        tangenti: D · sec²α · Δα</p>
+    <p>Il coseno è sempre minore di 1 e <i>diminuisce</i> al crescere dell'angolo. La secante al quadrato
+      <i>esplode</i>. Ecco che cosa significa in metri, con 20 m di distanza e mezzo grado scarso di errore di
+      mira (±0,7°):</p>
+    <div class="scroll"><table class="nums">
+      <tr><th style="text-align:left">Angolo di mira</th><th>Errore coi seni</th><th>Errore con le tangenti</th></tr>
+      <tr><td style="text-align:left">30°</td><td>± 0,21 m</td><td>± 0,33 m</td></tr>
+      <tr><td style="text-align:left">45°</td><td>± 0,17 m</td><td>± 0,49 m</td></tr>
+      <tr><td style="text-align:left">60°</td><td>± 0,12 m</td><td>± 0,98 m</td></tr>
+      <tr><td style="text-align:left">70°</td><td>± 0,08 m</td><td>± 2,09 m</td></tr>
+    </table></div>
+    <p>A 70° — cioè quando sei molto sotto una pianta alta — il metodo delle tangenti perde due metri per
+      mezzo grado di tremolio, mentre quello dei seni ne perde otto centimetri. È la ragione per cui la regola
+      «allontanati almeno quanto l'albero è alto» è severa per le tangenti e molto più blanda per i seni.</p>
 
-      <h3>Le quattro regole</h3>
+    <h3>Le quattro regole in bosco</h3>
     <ol class="proto">
-      <li><b>Distanza almeno pari all'altezza presunta.</b> Più ti avvicini, più un piccolo errore di
-        angolo diventa un grosso errore in metri. Sotto i 15 m da una pianta di 25 m il metodo peggiora molto.</li>
-      <li><b>La distanza si misura in orizzontale</b>, non lungo il pendio. In pendenza usa il calcolatore
-        nella scheda Tavole, oppure misura mantenendo la cordella tesa in bolla.</li>
+      <li><b>Distanza almeno pari all'altezza presunta</b>, se usi le tangenti. Con i seni puoi stare più
+        vicino, ma la cima diventa difficile da distinguere fra i rami.</li>
+      <li><b>La distanza si misura fino alla base del fusto</b>, non a occhio. Se il terreno è in pendenza,
+        misura la pendenza nella scheda 3 e converti.</li>
       <li><b>Mira alla cima vera.</b> In abete rosso è l'errore più frequente: da sotto, un ramo del
         verticillo alto sembra la cima e si sovrastima di 1–3 m. Spostati di lato e ricontrolla.</li>
-      <li><b>Stai fermo.</b> Registra solo quando l'indicatore di stabilità è verde: il telefono trema
-        molto più di quanto sembri.</li>
+      <li><b>Stai fermo.</b> Registra solo quando l'indicatore di stabilità è verde. Se trema comunque, alza
+        lo smorzamento: il telefono vibra molto più di quanto sembri.</li>
     </ol>
 
     <h3>Quanto è precisa</h3>
-    <p>Con distanza misurata bene e mano ferma si sta entro <b>±0,5–1,0 m</b> su piante di 25–30 m, che è
-      la precisione di un ipsometro ottico da campo. L'app calcola e mostra l'incertezza a ogni misura,
-      propagando l'errore di angolo e quello di distanza — vale la pena farla notare alla classe: è raro
-      che uno strumento didattico dichiari il proprio errore.</p>
-    <p class="eqn">Δh ≈ √[ ( D·(sec²α<sub>c</sub> + sec²α<sub>b</sub>)·Δα )² + ( (tan α<sub>c</sub> − tan α<sub>b</sub>)·ΔD )² ]</p>
+    <p>Con distanza misurata bene e mano ferma si sta entro <b>±0,5–1,0 m</b> su piante di 25–30 m, che è la
+      precisione di un ipsometro ottico da campo. L'app calcola e mostra l'incertezza a ogni misura,
+      propagando l'errore di angolo e quello di distanza secondo la formula del metodo che stai usando —
+      vale la pena farlo notare alla classe: è raro che uno strumento didattico dichiari il proprio errore.</p>
   </div>
 </section>
