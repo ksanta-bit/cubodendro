@@ -1,0 +1,138 @@
+<!-- ============ IPSOMETRO ============ -->
+<section id="tab-ips" hidden>
+  <div class="card">
+    <h2>1 · Sensore di inclinazione</h2>
+    <div id="ipsGate">
+      <p class="muted">L'ipsometro usa l'accelerometro del telefono per misurare l'angolo di mira.
+        Il browser chiede il permesso una volta sola, e serve un tocco per attivarlo.</p>
+      <button class="act" id="ipsStart">Attiva l'inclinometro</button>
+      <div id="ipsErr" class="warnbox" hidden></div>
+    </div>
+
+    <div id="ipsLive" hidden>
+      <div class="angle-wrap">
+        <div class="angle-val" id="ipsAng">0,0°</div>
+        <div class="angle-lab" id="ipsDir">orizzontale</div>
+      </div>
+      <div class="bubble"><div class="bubble-track"><div class="bubble-dot" id="ipsDot"></div>
+        <div class="bubble-zero"></div></div>
+        <div class="bubble-scale"><span>−60°</span><span>−30°</span><span>0°</span><span>+30°</span><span>+60°</span></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div class="tile"><div class="k">Stabilità</div><div class="v" id="ipsStab">—</div></div>
+        <div class="tile"><div class="k">Correzione zero</div><div class="v" id="ipsOff">0,0°</div><div class="u">gradi</div></div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="ghost" id="ipsZero">⊙ Azzera sull'orizzonte</button>
+        <button class="ghost" id="ipsZeroRes">Ripristina zero</button>
+      </div>
+      <div class="note">Per azzerare: appoggia il telefono di taglio su una superficie che sai essere
+        orizzontale (un davanzale, il piano di un tavolo) con la fotocamera che guarda avanti, e tocca
+        «Azzera sull'orizzonte». Serve a compensare il piccolo scostamento di fabbrica del sensore.</div>
+    </div>
+  </div>
+
+  <div class="card" id="ipsCardCam" hidden>
+    <h2>Mirino con la fotocamera</h2>
+    <div class="maptools">
+      <label class="switch"><input type="checkbox" id="camOn"><span></span>Usa la fotocamera per mirare</label>
+    </div>
+    <div id="camErr" class="warnbox" hidden></div>
+    <div class="camwrap" id="camWrap" hidden>
+      <video id="camVideo" playsinline muted autoplay></video>
+      <svg class="camover" viewBox="0 0 300 400" preserveAspectRatio="none">
+        <line x1="150" y1="0" x2="150" y2="400" stroke="#fff" stroke-opacity=".45" stroke-width="1"/>
+        <line x1="0" y1="200" x2="300" y2="200" stroke="#fff" stroke-opacity=".45" stroke-width="1"/>
+        <line x1="120" y1="200" x2="180" y2="200" stroke="#ffd34d" stroke-width="2.5"/>
+        <line x1="150" y1="180" x2="150" y2="220" stroke="#ffd34d" stroke-width="2.5"/>
+        <circle cx="150" cy="200" r="3" fill="#ffd34d"/>
+      </svg>
+      <div class="camang" id="camAng">0,0°</div>
+    </div>
+    <div class="note">Inquadra il punto da misurare e portalo sulla <b>crocetta gialla</b>, poi tocca
+      «Registra» qui sopra. Mirare guardando lo schermo è più preciso che mirare lungo il bordo del telefono,
+      e permette di controllare di aver preso davvero la cima e non un ramo.</div>
+  </div>
+
+  <div class="card" id="ipsCard2" hidden>
+    <h2>2 · Misura dell'altezza</h2>
+    <div class="grid g2">
+      <div><label for="ipsD">Distanza orizzontale dall'albero (m)</label>
+        <input id="ipsD" class="big-in" type="number" inputmode="decimal" step="0.1" value="20"></div>
+      <div><label for="ipsAlbero">Riferimento albero (facoltativo)</label>
+        <input id="ipsAlbero" type="text" placeholder="es. AdS 1 · n. 7"></div>
+    </div>
+    <div class="steps">
+      <div class="step" id="stepB">
+        <div class="step-n">1</div>
+        <div class="step-b"><b>Mira alla BASE del fusto</b>
+          <div class="muted">il punto dove il tronco entra nel terreno, dal lato a monte</div>
+          <div class="step-val" id="valB">—</div></div>
+        <button class="act step-btn" id="ipsRecB">Registra</button>
+      </div>
+      <div class="step" id="stepC">
+        <div class="step-n">2</div>
+        <div class="step-b"><b>Mira alla CIMA</b>
+          <div class="muted">la vera cima, non un ramo laterale che sporge</div>
+          <div class="step-val" id="valC">—</div></div>
+        <button class="act step-btn" id="ipsRecC">Registra</button>
+      </div>
+    </div>
+
+    <div id="ipsOut" hidden>
+      <div class="result">
+        <div class="result-k">Altezza dell'albero</div>
+        <div class="result-v"><span id="ipsH">—</span> <small>m</small></div>
+        <div class="result-e">incertezza stimata ± <span id="ipsDh">—</span> m</div>
+      </div>
+      <div class="scroll"><table class="nums" id="ipsDett"></table></div>
+      <div id="ipsWarn"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="act" id="ipsUse">↑ Usa nel rilievo</button>
+        <button class="ghost" id="ipsSave">＋ Salva nello storico</button>
+        <button class="ghost" id="ipsReset">↻ Nuova misura</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="ipsCard3" hidden>
+    <h2>3 · Storico delle misure</h2>
+    <div class="scroll"><table class="nums" id="ipsTab"></table></div>
+    <div class="row" style="margin-top:10px">
+      <button class="ghost" id="ipsExp">⬇ Esporta CSV</button>
+      <button class="danger" id="ipsClr">Svuota storico</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Come funziona — e perché due angoli</h2>
+    <p class="eqn">h = D · ( tan α<sub>cima</sub> − tan α<sub>base</sub> )</p>
+    <p>Gli angoli sono <b>con segno</b>: positivi sopra l'orizzonte, negativi sotto. Se la base dell'albero
+      sta più in basso dei tuoi occhi, α<sub>base</sub> è negativo e il suo contributo si somma.</p>
+    <p>Il metodo a <b>due angoli</b> è più forte di quello a un angolo solo perché non richiede di sapere a
+      che altezza tieni il telefono: l'altezza dell'occhio si semplifica da sola nella sottrazione. È il
+      principio dell'ipsometro Blume-Leiss e del Vertex, gli strumenti professionali.</p>
+
+
+  <figure class="figbox"><svg class="fig" viewBox="0 0 460 280" role="img" aria-label="Schema dell'ipsometro trigonometrico a due angoli" xmlns="http://www.w3.org/2000/svg"><defs><marker id="ak" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--text-primary)"/></marker><marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--series-2)"/></marker><marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--series-1)"/></marker><marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--brand)"/></marker></defs><line x1="26" y1="222" x2="434" y2="222" stroke="var(--line-strong)" stroke-width="2"/><rect x="342" y="66" width="16" height="156" fill="var(--wood)" opacity=".85"/><path d="M 314 112 L 350 58 L 386 112 Z" fill="var(--brand)" opacity=".45"/><path d="M 304 158 L 350 104 L 396 158 Z" fill="var(--brand)" opacity=".45"/><path d="M 294 206 L 350 152 L 406 206 Z" fill="var(--brand)" opacity=".45"/><line x1="66" y1="182" x2="402" y2="182" stroke="var(--line-strong)" stroke-width="1.5" stroke-dasharray="6 4"/><line x1="66" y1="182" x2="350" y2="20" stroke="var(--series-2)" stroke-width="2.2"/><line x1="66" y1="182" x2="350" y2="222" stroke="var(--series-1)" stroke-width="2.2"/><path d="M 124 182 A 58 58 0 0 0 120.5 162.3" fill="none" stroke="var(--series-2)" stroke-width="1.8"/><text x="140.0" y="160.0" text-anchor="start" font-size="11" fill="var(--series-2)" font-weight="800">α cima</text><path d="M 108 182 A 42 42 0 0 1 107.2 190.2" fill="none" stroke="var(--series-1)" stroke-width="1.8"/><text x="124.0" y="206.0" text-anchor="start" font-size="11" fill="var(--series-1)" font-weight="800">α base</text><circle cx="66" cy="182" r="5.5" fill="var(--text-primary)"/><text x="56.0" y="172.0" text-anchor="end" font-size="10" fill="var(--text-primary)" font-weight="700">occhio</text><line x1="66.0" y1="250.0" x2="350.0" y2="250.0" stroke="var(--text-primary)" stroke-width="1.8" marker-end="url(#ak)" marker-start="url(#ak)"/><text x="208.0" y="266.0" text-anchor="middle" font-size="11" fill="var(--text-primary)" font-weight="800">D — distanza orizzontale</text><rect x="20" y="16" width="250" height="30" rx="7" fill="var(--brand)" fill-opacity=".12"/><text x="32.0" y="36.0" text-anchor="start" font-size="13" fill="var(--brand)" font-weight="800">h = D · ( tan α cima − tan α base )</text></svg><figcaption><b>Perché servono due angoli e non uno.</b> Gli angoli sono <b>con segno</b>: positivo sopra l'orizzonte, negativo sotto. Se la base dell'albero sta più in basso dei tuoi occhi, il suo contributo si somma invece di sottrarsi. Il vantaggio del doppio angolo è che <b>l'altezza a cui tieni il telefono si semplifica da sola</b>: non devi misurarla né stimarla. È il principio degli ipsometri professionali Blume-Leiss e Vertex. La distanza D va misurata in orizzontale e conviene sia almeno pari all'altezza presunta: più ti avvicini, più un errore di mezzo grado diventa metri.</figcaption></figure>
+
+      <h3>Le quattro regole</h3>
+    <ol class="proto">
+      <li><b>Distanza almeno pari all'altezza presunta.</b> Più ti avvicini, più un piccolo errore di
+        angolo diventa un grosso errore in metri. Sotto i 15 m da una pianta di 25 m il metodo peggiora molto.</li>
+      <li><b>La distanza si misura in orizzontale</b>, non lungo il pendio. In pendenza usa il calcolatore
+        nella scheda Tavole, oppure misura mantenendo la cordella tesa in bolla.</li>
+      <li><b>Mira alla cima vera.</b> In abete rosso è l'errore più frequente: da sotto, un ramo del
+        verticillo alto sembra la cima e si sovrastima di 1–3 m. Spostati di lato e ricontrolla.</li>
+      <li><b>Stai fermo.</b> Registra solo quando l'indicatore di stabilità è verde: il telefono trema
+        molto più di quanto sembri.</li>
+    </ol>
+
+    <h3>Quanto è precisa</h3>
+    <p>Con distanza misurata bene e mano ferma si sta entro <b>±0,5–1,0 m</b> su piante di 25–30 m, che è
+      la precisione di un ipsometro ottico da campo. L'app calcola e mostra l'incertezza a ogni misura,
+      propagando l'errore di angolo e quello di distanza — vale la pena farla notare alla classe: è raro
+      che uno strumento didattico dichiari il proprio errore.</p>
+    <p class="eqn">Δh ≈ √[ ( D·(sec²α<sub>c</sub> + sec²α<sub>b</sub>)·Δα )² + ( (tan α<sub>c</sub> − tan α<sub>b</sub>)·ΔD )² ]</p>
+  </div>
+</section>

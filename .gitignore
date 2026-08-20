@@ -1,0 +1,4 @@
+# file temporanei di lavoro
+*.pyc
+__pycache__/
+node_modules/

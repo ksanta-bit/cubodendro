@@ -1,0 +1,385 @@
+<script>
+"use strict";
+/* ============================================================
+   PARTE B — DENDROCRONOLOGIA
+   ============================================================ */
+
+/* ---------- detrending ---------- */
+function movAvg(w, win){
+  const n=w.length, k=Math.floor(win/2), out=new Array(n);
+  for(let i=0;i<n;i++){ let s=0,c=0;
+    for(let j=Math.max(0,i-k); j<=Math.min(n-1,i+k); j++){ s+=w[j]; c++; }
+    out[i]=c?s/c:NaN; }
+  return out;
+}
+/* spline cubica approssimata: tre passaggi di media mobile ≈ filtro gaussiano */
+function splineApprox(w, win){
+  const w1=Math.max(3, Math.round(win/1.7)|1);
+  let g=movAvg(w,w1); g=movAvg(g,w1); g=movAvg(g,w1); return g;
+}
+function linTrend(w){
+  const xs=[],ys=[]; w.forEach(function(v,i){ if(isFinite(v)){xs.push(i);ys.push(v);} });
+  const f=(function(){ const n=xs.length; if(n<2)return null;
+    let sx=0,sy=0,sxx=0,sxy=0; for(let i=0;i<n;i++){sx+=xs[i];sy+=ys[i];sxx+=xs[i]*xs[i];sxy+=xs[i]*ys[i];}
+    const den=n*sxx-sx*sx; if(!den)return null; const b=(n*sxy-sx*sy)/den; return {a:(sy-b*sx)/n,b:b}; })();
+  if(!f) return w.map(function(){return NaN;});
+  return w.map(function(_,i){ return Math.max(0.01, f.a+f.b*i); });
+}
+/* esponenziale negativa g = a*exp(-b*t) + k, ricerca su k, minimi quadrati su ln(w-k) */
+function negExp(w){
+  const t=[],y=[]; w.forEach(function(v,i){ if(isFinite(v)){t.push(i);y.push(v);} });
+  if(t.length<8) return linTrend(w);
+  const mn=Math.min.apply(null,y);
+  let best=null;
+  for(let f=0; f<=0.9; f+=0.05){
+    const k=mn*f, xs=[],ys=[];
+    for(let i=0;i<t.length;i++){ const d=y[i]-k; if(d>1e-4){ xs.push(t[i]); ys.push(Math.log(d)); } }
+    if(xs.length<6) continue;
+    const n=xs.length; let sx=0,sy=0,sxx=0,sxy=0;
+    for(let i=0;i<n;i++){sx+=xs[i];sy+=ys[i];sxx+=xs[i]*xs[i];sxy+=xs[i]*ys[i];}
+    const den=n*sxx-sx*sx; if(!den) continue;
+    const b=(n*sxy-sx*sy)/den, lna=(sy-b*sx)/n, a=Math.exp(lna);
+    if(!(b<0)) continue;                       // richiesta: decrescente
+    let sse=0; for(let i=0;i<t.length;i++){ const p=a*Math.exp(b*t[i])+k; sse+=Math.pow(y[i]-p,2); }
+    if(!best || sse<best.sse) best={a:a,b:b,k:k,sse:sse};
+  }
+  if(!best) return linTrend(w);
+  return w.map(function(_,i){ return Math.max(0.01, best.a*Math.exp(best.b*i)+best.k); });
+}
+function detrendCurve(w, method, win){
+  const clean=w.map(function(v){ return isFinite(v)?v:NaN; });
+  if(method==='ma')     return movAvg(clean,win);
+  if(method==='spline') return splineApprox(clean,win);
+  if(method==='lin')    return linTrend(clean);
+  if(method==='negexp') return negExp(clean);
+  const m=clean.filter(isFinite).reduce(function(a,b){return a+b;},0)/Math.max(1,clean.filter(isFinite).length);
+  return clean.map(function(){ return m; });
+}
+
+/* ---------- statistica ---------- */
+function correl(a,b){
+  const xs=[],ys=[];
+  for(let i=0;i<a.length;i++) if(isFinite(a[i])&&isFinite(b[i])){ xs.push(a[i]); ys.push(b[i]); }
+  const n=xs.length; if(n<3) return {r:NaN,n:n};
+  let sx=0,sy=0; for(let i=0;i<n;i++){sx+=xs[i];sy+=ys[i];}
+  const mx=sx/n,my=sy/n; let sxy=0,sxx=0,syy=0;
+  for(let i=0;i<n;i++){ const dx=xs[i]-mx,dy=ys[i]-my; sxy+=dx*dy; sxx+=dx*dx; syy+=dy*dy; }
+  const r=(sxx>0&&syy>0)?sxy/Math.sqrt(sxx*syy):NaN;
+  return {r:r,n:n,mx:mx,my:my,sxx:sxx,sxy:sxy};
+}
+/* funzione beta incompleta (Numerical Recipes) per il p-value del t di Student */
+function betacf(a,b,x){
+  const MAXIT=200, EPS=3e-14, FPMIN=1e-300;
+  let qab=a+b, qap=a+1, qam=a-1, c=1, d=1-qab*x/qap;
+  if(Math.abs(d)<FPMIN) d=FPMIN; d=1/d; let h=d;
+  for(let m=1;m<=MAXIT;m++){
+    const m2=2*m;
+    let aa=m*(b-m)*x/((qam+m2)*(a+m2));
+    d=1+aa*d; if(Math.abs(d)<FPMIN)d=FPMIN; c=1+aa/c; if(Math.abs(c)<FPMIN)c=FPMIN; d=1/d; h*=d*c;
+    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+    d=1+aa*d; if(Math.abs(d)<FPMIN)d=FPMIN; c=1+aa/c; if(Math.abs(c)<FPMIN)c=FPMIN; d=1/d;
+    const del=d*c; h*=del; if(Math.abs(del-1)<EPS) break;
+  }
+  return h;
+}
+function gammaln(x){
+  const cof=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5];
+  let y=x, tmp=x+5.5; tmp-=(x+0.5)*Math.log(tmp); let ser=1.000000000190015;
+  for(let j=0;j<6;j++) ser+=cof[j]/++y;
+  return -tmp+Math.log(2.5066282746310005*ser/x);
+}
+function betai(a,b,x){
+  if(x<=0) return 0; if(x>=1) return 1;
+  const bt=Math.exp(gammaln(a+b)-gammaln(a)-gammaln(b)+a*Math.log(x)+b*Math.log(1-x));
+  return x < (a+1)/(a+b+2) ? bt*betacf(a,b,x)/a : 1-bt*betacf(b,a,1-x)/b;
+}
+function pValue(r,n){
+  if(!isFinite(r)||n<4) return NaN;
+  const rr=Math.min(0.999999,Math.abs(r)), df=n-2;
+  const t=rr*Math.sqrt(df/(1-rr*rr));
+  return betai(df/2,0.5,df/(df+t*t));  // bilaterale
+}
+
+/* ---------- gestione carote ---------- */
+function coreById(id){ return S.cores.filter(function(c){return c.id===id;})[0]; }
+$('addCore').addEventListener('click',function(){
+  const id=$('coreId').value.trim()||('C'+(S.cores.length+1));
+  const y=parseInt($('coreYear').value,10);
+  if(coreById(id)){ alert("Esiste già una carota con sigla "+id); return; }
+  S.cores.push({id:id, y0:isFinite(y)?y:2026, w:[]});
+  S.active=id; $('coreId').value=""; redrawDen(); $('wIn').focus();
+});
+$('coreSel').addEventListener('change',function(){ S.active=$('coreSel').value; redrawDen(); });
+$('wIn').addEventListener('keydown',function(e){
+  if(e.key!=='Enter') return; e.preventDefault();
+  const c=coreById(S.active); if(!c){ alert("Crea prima una carota."); return; }
+  const v=num($('wIn').value);
+  if(!(v>0)){ $('wIn').value=""; return; }
+  c.w.push(v); $('wIn').value=""; redrawDen();
+});
+$('undoW').addEventListener('click',function(){ const c=coreById(S.active); if(c&&c.w.length){ c.w.pop(); redrawDen(); } });
+$('clrDen').addEventListener('click',function(){ if(confirm("Cancellare tutte le carote?")){ S.cores=[]; S.active=null; redrawDen(); } });
+['detMethod','detWin','detIdx','yStart','yEnd','pCorr'].forEach(function(id){ $(id).addEventListener('change',redrawDen); });
+
+/* costruisce le serie allineate per anno */
+function buildChron(){
+  const method=$('detMethod').value, win=Math.max(3,parseInt($('detWin').value,10)||31);
+  const idx=$('detIdx').value;
+  const series=[];
+  S.cores.forEach(function(c){
+    if(c.w.length<5) return;
+    const g=detrendCurve(c.w, method, win);
+    const rwi=c.w.map(function(v,i){
+      if(!isFinite(g[i])||g[i]<=0) return NaN;
+      return idx==='ratio' ? v/g[i] : 1+(v-g[i])/(g[i]||1);
+    });
+    series.push({id:c.id, y0:c.y0, w:c.w, g:g, rwi:rwi,
+      years:c.w.map(function(_,i){ return c.y0-i; })});
+  });
+  if(!series.length) return null;
+  let ymax=-1e9,ymin=1e9;
+  series.forEach(function(s){ ymax=Math.max(ymax,s.years[0]); ymin=Math.min(ymin,s.years[s.years.length-1]); });
+  const years=[]; for(let y=ymin;y<=ymax;y++) years.push(y);
+  const mat=series.map(function(s){
+    const m={}; s.years.forEach(function(y,i){ m[y]=s.rwi[i]; });
+    return years.map(function(y){ return isFinite(m[y])?m[y]:NaN; });
+  });
+  const chron=years.map(function(_,i){
+    const v=mat.map(function(row){return row[i];}).filter(isFinite);
+    return v.length ? v.reduce(function(a,b){return a+b;},0)/v.length : NaN;
+  });
+  const nser=years.map(function(_,i){ return mat.map(function(row){return row[i];}).filter(isFinite).length; });
+  /* rbar */
+  let rs=[];
+  for(let i=0;i<mat.length;i++) for(let j=i+1;j<mat.length;j++){
+    const c=correl(mat[i],mat[j]); if(isFinite(c.r)&&c.n>=10) rs.push(c.r);
+  }
+  const rbar = rs.length ? rs.reduce(function(a,b){return a+b;},0)/rs.length : NaN;
+  const nEff = mat.length;
+  const eps = isFinite(rbar)&&nEff>0 ? nEff*rbar/(1+(nEff-1)*rbar) : NaN;
+  /* sensibilità media della cronologia */
+  let ms=[],prev=NaN;
+  chron.forEach(function(v){ if(isFinite(v)&&isFinite(prev)&&(v+prev)>0) ms.push(2*Math.abs(v-prev)/(v+prev)); prev=v; });
+  const msv = ms.length ? ms.reduce(function(a,b){return a+b;},0)/ms.length : NaN;
+  const allw=[]; series.forEach(function(s){ s.w.forEach(function(v){ if(isFinite(v)) allw.push(v); }); });
+  return {series:series, years:years, chron:chron, nser:nser, rbar:rbar, eps:eps, ms:msv,
+    wmean: allw.length?allw.reduce(function(a,b){return a+b;},0)/allw.length:NaN,
+    maxAge: Math.max.apply(null,series.map(function(s){return s.w.length;}))};
+}
+
+/* ---------- correlazioni col clima ---------- */
+function climIndex(){ const m={}; CLIMA.cols.forEach(function(c,i){ m[c]=i+1; }); return m; }
+function climSeries(name, corr){
+  const ci=climIndex()[name], out={};
+  const isP = name.charAt(0)==='P';
+  CLIMA.rows.forEach(function(r){ const v=r[ci];
+    out[r[0]] = (v===null||v===undefined)?NaN:(isP?v*corr:v); });
+  return out;
+}
+const DESCR={T_MJJ:"T media maggio–luglio",T_JJA:"T media giugno–agosto",T_AMJJAS:"T media aprile–settembre",
+  P_MJJ:"P cumulata maggio–luglio",P_JJA:"P cumulata giugno–agosto",P_AMJJAS:"P cumulata aprile–settembre",
+  T_anno:"T media annua",P_anno:"P cumulata annua",T_prevOND:"T ott–dic anno precedente",P_prevOND:"P ott–dic anno precedente"};
+const MESI=["gennaio","febbraio","marzo","aprile","maggio","giugno","luglio","agosto","settembre","ottobre","novembre","dicembre"];
+function descr(v){
+  if(DESCR[v]) return DESCR[v];
+  const m=parseInt(v.slice(1),10);
+  return (v.charAt(0)==='T'?"T media di ":"P di ")+MESI[m-1];
+}
+function computeCorr(ch){
+  const y0=parseInt($('yStart').value,10), y1=parseInt($('yEnd').value,10);
+  const pc=num($('pCorr').value)||1;
+  const cm={}; ch.years.forEach(function(y,i){ cm[y]=ch.chron[i]; });
+  const yrs=[]; for(let y=y0;y<=y1;y++) if(isFinite(cm[y])) yrs.push(y);
+  const rwi=yrs.map(function(y){ return cm[y]; });
+  const res=CLIMA.cols.map(function(v){
+    const cs=climSeries(v,pc);
+    const x=yrs.map(function(y){ return isFinite(cs[y])?cs[y]:NaN; });
+    const c=correl(rwi,x);
+    return {v:v, d:descr(v), r:c.r, n:c.n, p:pValue(c.r,c.n)};
+  }).filter(function(o){ return isFinite(o.r); });
+  res.sort(function(a,b){ return Math.abs(b.r)-Math.abs(a.r); });
+  return {res:res, yrs:yrs, rwi:rwi, pc:pc};
+}
+
+/* ---------- rendering dendro ---------- */
+function redrawDen(){
+  /* chips e select */
+  $('coreChips').innerHTML = S.cores.length ? S.cores.map(function(c){
+    return '<span class="chip">'+c.id+' · '+c.y0+' · '+c.w.length+' anelli<button data-del="'+c.id+'">✕</button></span>';
+  }).join('') : '<span class="muted">Nessuna carota. Creane una qui sopra.</span>';
+  $('coreChips').querySelectorAll('button[data-del]').forEach(function(b){
+    b.addEventListener('click',function(){
+      S.cores=S.cores.filter(function(c){return c.id!==b.dataset.del;});
+      if(S.active===b.dataset.del) S.active=S.cores.length?S.cores[0].id:null; redrawDen(); });
+  });
+  const sel=$('coreSel'); sel.innerHTML='';
+  S.cores.forEach(function(c){ const o=document.createElement('option'); o.value=c.id; o.textContent=c.id;
+    if(c.id===S.active)o.selected=true; sel.appendChild(o); });
+  if(!S.active && S.cores.length){ S.active=S.cores[0].id; sel.value=S.active; }
+
+  const c=coreById(S.active);
+  $('nextYearMsg').innerHTML = c
+    ? 'Carota <b>'+c.id+'</b> — prossimo anello da inserire: anno <b>'+(c.y0-c.w.length)+'</b> ('+(c.w.length+1)+'° dalla corteccia).'
+    : 'Si procede <b>dalla corteccia verso il midollo</b>: il primo valore è l\'anello più esterno.';
+  $('wList').innerHTML = c && c.w.length
+    ? c.w.map(function(v,i){ return '<span class="chip">'+(c.y0-i)+': '+fmt(v,2)+'</span>'; }).reverse().join('')
+    : '';
+
+  const ch=buildChron();
+  if(!ch){
+    ['sN','sY','sW','sMS','sRb','sEPS'].forEach(function(id){ $(id).textContent='—'; });
+    $('sN').textContent=S.cores.length;
+    $('epsMsg').textContent='Servono almeno 5 anelli misurati su una carota per avviare la standardizzazione.';
+    svgWrap('chRaw',640,300).appendChild(axisText(320,150,'Nessuna serie',undefined,13));
+    svgWrap('chRwi',640,300).appendChild(axisText(320,150,'Nessuna serie',undefined,13));
+    svgWrap('chCorr',640,200).appendChild(axisText(320,100,'Nessuna serie',undefined,13));
+    svgWrap('chScat',640,340).appendChild(axisText(320,170,'Nessuna serie',undefined,13));
+    $('tabCorr').innerHTML=''; $('scEq').textContent=''; return;
+  }
+  $('sN').textContent=ch.series.length;
+  $('sY').textContent=ch.years[0]+'–'+ch.years[ch.years.length-1];
+  $('sW').textContent=fmt(ch.wmean,2);
+  $('sMS').textContent=fmt(ch.ms,3);
+  $('sRb').textContent=isFinite(ch.rbar)?fmt(ch.rbar,3):"—";
+  $('sEPS').textContent=isFinite(ch.eps)?fmt(ch.eps,3):"—";
+  $('epsMsg').textContent = !isFinite(ch.eps) ? 'Servono almeno due carote con 10 anni in comune per calcolare r̄ ed EPS.'
+    : (ch.eps>=0.85 ? '✓ EPS ≥ 0,85: la cronologia media è statisticamente affidabile.'
+       : 'EPS < 0,85: il segnale comune è ancora debole. Servono più carote, oppure le serie non sono ben datate fra loro (ricontrollare il cross-dating).');
+
+  drawRaw(ch); drawRwi(ch);
+  const cc=computeCorr(ch);
+  drawCorr(cc); fillCorrTable(cc); fillVarSel(cc); drawScatter(ch,cc);
+}
+
+function fillCorrTable(cc){
+  let t='<tr><th style="text-align:left">Variabile</th><th>r</th><th>n</th><th>p</th><th>Signif.</th></tr>';
+  cc.res.slice(0,14).forEach(function(o){
+    t+='<tr><td style="text-align:left">'+o.d+'</td><td>'+fmt(o.r,3)+'</td><td>'+o.n+'</td><td>'+
+       (o.p<0.0001?'&lt;0,0001':fmt(o.p,4))+'</td><td class="sig '+(o.p<0.05?'y':'n')+'">'+(o.p<0.05?'sì':'no')+'</td></tr>';
+  });
+  $('tabCorr').innerHTML=t;
+}
+function fillVarSel(cc){
+  const sel=$('varSel'), keep=sel.value;
+  sel.innerHTML='';
+  cc.res.forEach(function(o){ const op=document.createElement('option'); op.value=o.v;
+    op.textContent=o.d+'  (r = '+fmt(o.r,2)+')'; sel.appendChild(op); });
+  if(keep && cc.res.some(function(o){return o.v===keep;})) sel.value=keep;
+  sel.onchange=function(){ const ch=buildChron(); if(ch) drawScatter(ch,computeCorr(ch)); };
+}
+
+function drawRaw(ch){
+  const W=640,H=300,ml=48,mr=14,mt=14,mb=44;
+  const s=svgWrap('chRaw',W,H);
+  const y0=Math.min.apply(null,ch.years), y1=Math.max.apply(null,ch.years);
+  let wmax=0; ch.series.forEach(function(se){ se.w.forEach(function(v){ if(v>wmax)wmax=v; }); });
+  wmax=Math.max(0.5,Math.ceil(wmax*1.1*2)/2);
+  const X=function(y){ return ml+(y-y0)/Math.max(1,(y1-y0))*(W-ml-mr); };
+  const Y=function(v){ return H-mb-(v/wmax)*(H-mb-mt); };
+  const st=niceStep(wmax);
+  for(let v=0;v<=wmax+1e-9;v+=st){ s.appendChild(el('line',{x1:ml,y1:Y(v),x2:W-mr,y2:Y(v),stroke:cssv('--line')}));
+    s.appendChild(axisText(ml-7,Y(v)+4,fmt(v,1),'end')); }
+  xTicks(s,y0,y1,X,H,mb);
+  ch.series.forEach(function(se){
+    let p=''; se.years.forEach(function(y,i){ p+=(p?'L':'M')+X(y).toFixed(1)+' '+Y(se.w[i]).toFixed(1); });
+    s.appendChild(el('path',{d:p,fill:'none',stroke:cssv('--series-1'),'stroke-width':1.6,opacity:0.55,'stroke-linejoin':'round'}));
+    let q=''; se.years.forEach(function(y,i){ if(isFinite(se.g[i])) q+=(q?'L':'M')+X(y).toFixed(1)+' '+Y(se.g[i]).toFixed(1); });
+    s.appendChild(el('path',{d:q,fill:'none',stroke:cssv('--series-2'),'stroke-width':2.4,'stroke-linejoin':'round'}));
+  });
+  s.appendChild(el('line',{x1:ml,y1:H-mb,x2:W-mr,y2:H-mb,stroke:cssv('--line-strong')}));
+  s.appendChild(el('text',{x:14,y:mt+4,'font-size':11,fill:cssv('--text-secondary'),transform:'rotate(-90 14 '+(mt+4)+')','text-anchor':'end'},'larghezza anello (mm)'));
+}
+function xTicks(s,y0,y1,X,H,mb){
+  const span=y1-y0, step= span>120?25: span>60?20: span>30?10:5;
+  for(let y=Math.ceil(y0/step)*step; y<=y1; y+=step){
+    s.appendChild(el('line',{x1:X(y),y1:H-mb,x2:X(y),y2:H-mb+4,stroke:cssv('--line-strong')}));
+    s.appendChild(axisText(X(y),H-mb+17,String(y)));
+  }
+}
+function drawRwi(ch){
+  const W=640,H=300,ml=48,mr=14,mt=14,mb=44;
+  const s=svgWrap('chRwi',W,H);
+  const y0=Math.min.apply(null,ch.years), y1=Math.max.apply(null,ch.years);
+  const vals=ch.chron.filter(isFinite);
+  if(!vals.length){ s.appendChild(axisText(W/2,H/2,'—')); return; }
+  const lo=Math.min(0.6,Math.floor(Math.min.apply(null,vals)*10)/10);
+  const hi=Math.max(1.4,Math.ceil(Math.max.apply(null,vals)*10)/10);
+  const X=function(y){ return ml+(y-y0)/Math.max(1,(y1-y0))*(W-ml-mr); };
+  const Y=function(v){ return H-mb-(v-lo)/(hi-lo)*(H-mb-mt); };
+  for(let v=Math.ceil(lo*5)/5; v<=hi+1e-9; v+=0.2){
+    s.appendChild(el('line',{x1:ml,y1:Y(v),x2:W-mr,y2:Y(v),stroke:cssv('--line')}));
+    s.appendChild(axisText(ml-7,Y(v)+4,fmt(v,1),'end'));
+  }
+  xTicks(s,y0,y1,X,H,mb);
+  /* area sopra/sotto 1 */
+  let above='M'+X(y0)+' '+Y(1), below='M'+X(y0)+' '+Y(1);
+  let p='';
+  ch.years.forEach(function(y,i){ if(isFinite(ch.chron[i])) p+=(p?'L':'M')+X(y).toFixed(1)+' '+Y(ch.chron[i]).toFixed(1); });
+  s.appendChild(el('line',{x1:ml,y1:Y(1),x2:W-mr,y2:Y(1),stroke:cssv('--line-strong'),'stroke-width':1.5,'stroke-dasharray':'4 3'}));
+  s.appendChild(el('path',{d:p,fill:'none',stroke:cssv('--series-1'),'stroke-width':2,'stroke-linejoin':'round'}));
+  ch.years.forEach(function(y,i){ if(isFinite(ch.chron[i])){
+    const c=el('circle',{cx:X(y),cy:Y(ch.chron[i]),r:3.2,fill:cssv('--series-1'),stroke:cssv('--surface-1'),'stroke-width':1.5});
+    c.appendChild(el('title',{},y+' — RWI '+fmt(ch.chron[i],3)+' ('+ch.nser[i]+' serie)')); s.appendChild(c); } });
+  s.appendChild(el('line',{x1:ml,y1:H-mb,x2:W-mr,y2:H-mb,stroke:cssv('--line-strong')}));
+  s.appendChild(axisText((W+ml)/2,H-6,'anno'));
+  s.appendChild(el('text',{x:14,y:mt+4,'font-size':11,fill:cssv('--text-secondary'),transform:'rotate(-90 14 '+(mt+4)+')','text-anchor':'end'},'indice RWI'));
+}
+function drawCorr(cc){
+  const items=cc.res.slice(0,20);
+  const W=640, rowH=24, mt=26, mb=30, ml=176, mr=44;
+  const H=mt+items.length*rowH+mb;
+  const s=svgWrap('chCorr',W,H);
+  const mx=Math.max(0.3,Math.ceil(Math.max.apply(null,items.map(function(o){return Math.abs(o.r);}))*10)/10);
+  const cx=ml+(W-ml-mr)/2, half=(W-ml-mr)/2;
+  const X=function(r){ return cx + r/mx*half; };
+  [-mx,-mx/2,0,mx/2,mx].forEach(function(v){
+    s.appendChild(el('line',{x1:X(v),y1:mt-6,x2:X(v),y2:mt+items.length*rowH,stroke:v===0?cssv('--line-strong'):cssv('--line')}));
+    s.appendChild(axisText(X(v),mt-12,fmt(v,1)));
+  });
+  items.forEach(function(o,i){
+    const y=mt+i*rowH+rowH/2, x0=X(0), x1=X(o.r);
+    const w=Math.abs(x1-x0), x=Math.min(x0,x1);
+    s.appendChild(el('rect',{x:x,y:y-7,width:Math.max(2,w),height:14,rx:4,ry:4,
+      fill: o.r>=0?cssv('--pos'):cssv('--neg'), opacity: o.p<0.05?1:0.42}));
+    s.appendChild(el('text',{x:ml-8,y:y+4,'text-anchor':'end','font-size':11.5,fill:cssv('--text-primary')},o.d));
+    s.appendChild(el('text',{x:W-mr+6,y:y+4,'font-size':11.5,fill:cssv('--text-secondary')},fmt(o.r,2)+(o.p<0.05?' *':'')));
+  });
+  s.appendChild(axisText(cx,H-8,'coefficiente di correlazione r  ·  * = significativo a p < 0,05  ·  barre piene = significative'));
+}
+function drawScatter(ch,cc){
+  const v=$('varSel').value || (cc.res[0]&&cc.res[0].v);
+  if(!v){ return; }
+  const cs=climSeries(v,cc.pc);
+  const xs=[],ys=[];
+  cc.yrs.forEach(function(y,i){ if(isFinite(cs[y])){ xs.push(cs[y]); ys.push(cc.rwi[i]); } });
+  const W=640,H=340,ml=54,mr=16,mt=16,mb=48;
+  const s=svgWrap('chScat',W,H);
+  if(xs.length<3){ s.appendChild(axisText(W/2,H/2,'Dati insufficienti',undefined,13)); return; }
+  const f=linfit(xs,ys), c=correl(ys,xs);
+  $('scR').textContent=fmt(c.r,3); $('scR2').textContent=fmt(c.r*c.r,3);
+  const xmin=Math.min.apply(null,xs), xmax=Math.max.apply(null,xs);
+  const ymin=Math.min.apply(null,ys), ymax=Math.max.apply(null,ys);
+  const px=(xmax-xmin)*0.06||1, py=(ymax-ymin)*0.08||0.1;
+  const X=function(x){ return ml+(x-(xmin-px))/((xmax+px)-(xmin-px))*(W-ml-mr); };
+  const Y=function(y){ return H-mb-(y-(ymin-py))/((ymax+py)-(ymin-py))*(H-mb-mt); };
+  for(let k=0;k<=4;k++){
+    const y=(ymin-py)+k*((ymax+py)-(ymin-py))/4;
+    s.appendChild(el('line',{x1:ml,y1:Y(y),x2:W-mr,y2:Y(y),stroke:cssv('--line')}));
+    s.appendChild(axisText(ml-7,Y(y)+4,fmt(y,2),'end'));
+    const x=(xmin-px)+k*((xmax+px)-(xmin-px))/4;
+    s.appendChild(axisText(X(x),H-mb+17,fmt(x, Math.abs(xmax)>60?0:1)));
+  }
+  if(f) s.appendChild(el('line',{x1:X(xmin-px),y1:Y(f.a+f.b*(xmin-px)),x2:X(xmax+px),y2:Y(f.a+f.b*(xmax+px)),
+    stroke:cssv('--series-2'),'stroke-width':2.5}));
+  xs.forEach(function(x,i){
+    const cc2=el('circle',{cx:X(x),cy:Y(ys[i]),r:4.5,fill:cssv('--series-1'),opacity:0.8,stroke:cssv('--surface-1'),'stroke-width':1.5});
+    cc2.appendChild(el('title',{},cc.yrs[i]+' — '+fmt(x,1)+' / RWI '+fmt(ys[i],3))); s.appendChild(cc2);
+  });
+  s.appendChild(el('line',{x1:ml,y1:H-mb,x2:W-mr,y2:H-mb,stroke:cssv('--line-strong')}));
+  s.appendChild(axisText((W+ml)/2,H-8,descr(v)+(v.charAt(0)==='T'?'  (°C)':'  (mm)')));
+  s.appendChild(el('text',{x:14,y:mt+4,'font-size':11,fill:cssv('--text-secondary'),transform:'rotate(-90 14 '+(mt+4)+')','text-anchor':'end'},'indice RWI'));
+  $('scEq').textContent = f ? 'RWI = '+fmt(f.a,4)+' + '+fmt(f.b,5)+' × '+v+'      r = '+fmt(c.r,3)+
+    '      R² = '+fmt(c.r*c.r,3)+'      n = '+xs.length+' anni      p = '+
+    (pValue(c.r,xs.length)<0.0001?'<0,0001':fmt(pValue(c.r,xs.length),4)) : '';
+}
+</script>

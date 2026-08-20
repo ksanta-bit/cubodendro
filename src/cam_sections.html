@@ -1,0 +1,94 @@
+<!-- inserto: mirino fotocamera nella scheda Ipsometro -->
+<div class="card" id="ipsCardCam" hidden>
+  <h2>Mirino con la fotocamera</h2>
+  <div class="maptools">
+    <label class="switch"><input type="checkbox" id="camOn"><span></span>Usa la fotocamera per mirare</label>
+  </div>
+  <div id="camErr" class="warnbox" hidden></div>
+  <div class="camwrap" id="camWrap" hidden>
+    <video id="camVideo" playsinline muted autoplay></video>
+    <svg class="camover" viewBox="0 0 300 400" preserveAspectRatio="none">
+      <line x1="150" y1="0" x2="150" y2="400" stroke="#fff" stroke-opacity=".45" stroke-width="1"/>
+      <line x1="0" y1="200" x2="300" y2="200" stroke="#fff" stroke-opacity=".45" stroke-width="1"/>
+      <line x1="120" y1="200" x2="180" y2="200" stroke="#ffd34d" stroke-width="2.5"/>
+      <line x1="150" y1="180" x2="150" y2="220" stroke="#ffd34d" stroke-width="2.5"/>
+      <circle cx="150" cy="200" r="3" fill="#ffd34d"/>
+    </svg>
+    <div class="camang" id="camAng">0,0°</div>
+  </div>
+  <div class="note">Inquadra il punto da misurare e portalo sulla <b>crocetta gialla</b>, poi tocca
+    «Registra» qui sopra. Mirare guardando lo schermo è più preciso che mirare lungo il bordo del telefono,
+    e permette di controllare di aver preso davvero la cima e non un ramo.</div>
+</div>
+
+<!-- inserto: misura degli anelli da fotografia, nella scheda Dendro -->
+<div class="card" id="foto">
+  <h2>Misura degli anelli da fotografia</h2>
+  <p class="muted">Fotografa la carota <b>accanto a un righello</b>, poi misura gli anelli toccando lo
+    schermo. Si arriva a 0,05–0,1 mm, contro i 0,5 mm scarsi che si ottengono a occhio nudo con un righello.</p>
+  <label for="fotoFile">Foto della carota</label>
+  <input id="fotoFile" type="file" accept="image/*" capture="environment">
+
+  <div id="fotoWork" hidden>
+    <div class="fotowrap">
+      <canvas id="fotoCv"></canvas>
+      <canvas id="fotoLoupe" class="loupe" hidden></canvas>
+    </div>
+    <div class="row" style="margin-top:9px">
+      <button class="ghost" id="fzIn">＋</button>
+      <button class="ghost" id="fzOut">−</button>
+      <button class="ghost" id="fzFit">Adatta</button>
+      <button class="ghost" id="fUndo">↩ Annulla punto</button>
+    </div>
+
+    <div class="steps" style="margin-top:13px">
+      <div class="step" id="fStep1">
+        <div class="step-n">1</div>
+        <div class="step-b"><b>Taratura sul righello</b>
+          <div class="muted">Tocca due tacche del righello, poi indica quanti millimetri le separano</div>
+          <div class="step-val" id="fCal">—</div></div>
+      </div>
+      <div class="step" id="fStep2">
+        <div class="step-n">2</div>
+        <div class="step-b"><b>Limiti degli anelli</b>
+          <div class="muted">Tocca in ordine ogni limite, dalla corteccia verso il midollo</div>
+          <div class="step-val" id="fCount">0 punti</div></div>
+      </div>
+    </div>
+
+    <div class="grid g2" id="fCalBox" style="margin-top:10px">
+      <div><label for="fMm">Distanza fra le due tacche (mm)</label>
+        <input id="fMm" type="number" inputmode="decimal" step="0.5" value="10"></div>
+      <div style="display:flex;align-items:flex-end">
+        <button class="act" id="fCalOk">Conferma taratura</button></div>
+    </div>
+
+    <div id="fOut" hidden>
+      <div class="tiles" style="margin-top:11px">
+        <div class="tile"><div class="k">Scala</div><div class="v sm" id="fScale">—</div><div class="u">mm per pixel</div></div>
+        <div class="tile"><div class="k">Anelli misurati</div><div class="v" id="fN">0</div></div>
+        <div class="tile"><div class="k">Larghezza media</div><div class="v" id="fMean">—</div><div class="u">mm</div></div>
+      </div>
+      <div class="scroll" style="margin-top:10px"><table id="fTab"></table></div>
+      <div class="row" style="margin-top:10px">
+        <button class="act" id="fSend">↑ Invia alla carota attiva</button>
+        <button class="ghost" id="fReset">↻ Ricomincia</button>
+      </div>
+      <div class="note">I valori sostituiscono le larghezze già inserite nella carota selezionata nella
+        scheda «Anelli». L'anno del primo limite è quello dell'anello più esterno della carota.</div>
+    </div>
+  </div>
+
+  <details style="margin-top:11px"><summary>Come fotografare bene una carota</summary>
+    <ol class="proto">
+      <li>Carteggia e inumidisci la superficie: senza contrasto la fotocamera non vede gli anelli sottili.</li>
+      <li>Appoggia un <b>righello metallico</b> accanto alla carota, sullo stesso piano: se è più alto o più
+        basso, la scala risulta sbagliata per effetto della prospettiva.</li>
+      <li>Fotografa <b>dall'alto, perpendicolarmente</b>, con luce radente laterale: esalta il rilievo fra
+        legno primaverile e tardivo.</li>
+      <li>Non usare il flash frontale: appiattisce tutto. Meglio la luce di una finestra o una torcia tenuta di lato.</li>
+      <li>Riempi l'inquadratura con 3–4 cm di carota per volta. Per una carota lunga fai più foto,
+        sovrapponendole di qualche anello e misurandole una alla volta.</li>
+    </ol>
+  </details>
+</div>

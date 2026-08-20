@@ -1,0 +1,334 @@
+<!-- ============ TAVOLE ============ -->
+<section id="tab-tav" hidden>
+  <div class="card">
+    <h2>Calcolo del volume di un singolo albero</h2>
+    <div class="grid g3">
+      <div><label for="tvSp">Specie</label><select id="tvSp"></select></div>
+      <div><label for="tvD">Diametro a 1,30 m (cm)</label><input id="tvD" type="number" value="35" step="0.5"></div>
+      <div><label for="tvH">Altezza totale (m)</label><input id="tvH" type="number" value="27" step="0.5"></div>
+    </div>
+    <div class="tiles" style="margin-top:12px">
+      <div class="tile"><div class="k">Volume</div><div class="v" id="tvV">—</div><div class="u">m³</div></div>
+      <div class="tile"><div class="k">Area basimetrica g</div><div class="v" id="tvG">—</div><div class="u">m²</div></div>
+      <div class="tile"><div class="k">Coeff. di forma</div><div class="v" id="tvF">—</div></div>
+      <div class="tile"><div class="k">Vol. del cilindro</div><div class="v" id="tvC">—</div><div class="u">m³</div></div>
+    </div>
+    <div class="eqn" id="tvEq"></div>
+  </div>
+
+  <div class="card">
+    <h2>Correzione della pendenza</h2>
+    <div class="grid g3">
+      <div><label for="pdG">Pendenza (gradi)</label><input id="pdG" type="number" value="25" step="1"></div>
+      <div><label for="pdR">Raggio in proiezione (m)</label><input id="pdR" type="number" value="13" step="0.5"></div>
+      <div class="tiles"><div class="tile"><div class="k">Raggio da stendere</div><div class="v" id="pdOut">—</div><div class="u">m</div></div></div>
+    </div>
+
+  <figure class="figbox"><svg class="fig" viewBox="0 0 460 260" role="img" aria-label="Correzione della pendenza del raggio dell'area di saggio" xmlns="http://www.w3.org/2000/svg"><defs><marker id="ak" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--text-primary)"/></marker><marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--series-2)"/></marker><marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--series-1)"/></marker><marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--brand)"/></marker></defs><path d="M 56 196 L 331.0 61.9 L 331.0 196 Z" fill="var(--surface-2)" opacity=".55"/><line x1="56" y1="196" x2="331.0" y2="61.9" stroke="var(--wood)" stroke-width="3.5"/><line x1="56" y1="196" x2="331.0" y2="196" stroke="var(--line-strong)" stroke-width="1.6" stroke-dasharray="6 4"/><path d="M 106 196 A 50 50 0 0 0 100.9 174.1" fill="none" stroke="var(--amber)" stroke-width="1.8"/><text x="120.0" y="182.0" text-anchor="start" font-size="14" fill="var(--amber)" font-weight="800">α</text><line x1="56.0" y1="222.0" x2="331.0" y2="222.0" stroke="var(--text-primary)" stroke-width="1.8" marker-end="url(#ak)" marker-start="url(#ak)"/><text x="193.5" y="238.0" text-anchor="middle" font-size="11" fill="var(--text-primary)" font-weight="800">r  in proiezione orizzontale</text><line x1="38" y1="187" x2="313.0" y2="52.9" stroke="var(--series-2)" stroke-width="1.8" marker-end="url(#ao)" marker-start="url(#ao)"/><text font-size="11" fill="var(--series-2)" font-weight="800" text-anchor="middle" transform="translate(178 111) rotate(-26)">r′ = r / cos α</text><circle cx="56" cy="196" r="5.5" fill="var(--brand)"/><text x="56.0" y="180.0" text-anchor="middle" font-size="10" fill="var(--brand)" font-weight="700">centro</text><text x="230.0" y="26.0" text-anchor="middle" font-size="13" fill="var(--text-primary)" font-weight="800">26°  ·  r = 13 m  →  r′ = 14,5 m</text></svg><figcaption><b>Perché in pendenza la cordella va stesa più lunga.</b> La superficie di riferimento in dendrometria è sempre la <b>proiezione orizzontale</b>, la stessa che si usa in catasto. Su un versante inclinato, per delimitare un cerchio la cui proiezione ha raggio r bisogna stendere la cordella di r′ = r / cos α nelle direzioni di massima pendenza. Su un versante a 26° con raggio 13 m servono 14,5 m: trascurare la correzione gonfia del 10% le piante per ettaro e, con esse, la provvigione. Lungo le curve di livello la correzione non serve.</figcaption></figure>
+
+      <div class="muted">Se si vuole un'area di saggio di superficie <i>orizzontale</i> costante, sul terreno in pendenza
+      la cordella va stesa più lunga: r' = r / cos(α). Con α = 25° e r = 13 m servono 14,34 m.</div>
+  </div>
+
+  <div class="card">
+    <h2>Tavola di cubatura a doppia entrata</h2>
+    <div class="grid g2">
+      <div><label for="dtSp">Specie</label><select id="dtSp"></select></div>
+      <div style="display:flex;align-items:flex-end"><button class="ghost" id="prnTav">🖨 Stampa questa tavola</button></div>
+    </div>
+    <p class="muted">Volume in m³ per albero. Equazioni ufficiali dell'Inventario Nazionale delle Foreste
+      (Tabacchi, Di Cosmo, Gasparini, Morelli, 2011).</p>
+    <div class="scroll"><table class="nums" id="tabDouble"></table></div>
+  </div>
+
+  <div class="card">
+    <h2>Coefficienti delle equazioni</h2>
+    <p class="eqn">v [dm³] = b1 + b2 · d² · h + b3 · d &nbsp;&nbsp;(d in cm, h in m)</p>
+    <div class="scroll"><table class="nums" id="tabCoef"></table></div>
+    <p class="muted">Fonte: Tabacchi G., Di Cosmo L., Gasparini P., Morelli S. (2011). <i>Stima del volume e della
+      fitomassa delle principali specie forestali italiane. Equazioni di previsione, tavole del volume e tavole
+      della fitomassa arborea epigea.</i> CRA — Unità di ricerca per il Monitoraggio e la Pianificazione Forestale, Trento.</p>
+  </div>
+</section>
+
+<!-- ============ PROTOCOLLO ============ -->
+<section id="tab-pro" hidden>
+  <div class="card">
+    <h2>Programma della mattinata</h2>
+    <div class="scroll"><table>
+      <tr><th>Ora</th><th style="text-align:left">Cosa</th></tr>
+      <tr><td>8.30</td><td style="text-align:left">Ritrovo, briefing di sicurezza, consegna strumenti e schede</td></tr>
+      <tr><td>9.00</td><td style="text-align:left">Trasferimento in bosco e lettura del popolamento (10 min in silenzio)</td></tr>
+      <tr><td>9.15</td><td style="text-align:left">Delimitazione delle aree di saggio — tutti insieme sulla prima</td></tr>
+      <tr><td>9.30</td><td style="text-align:left">Cavallettamento nei gruppi (rotazione dei ruoli ogni 15 min)</td></tr>
+      <tr><td>10.15</td><td style="text-align:left">Misura delle altezze con smartphone e ipsometro</td></tr>
+      <tr><td>10.45</td><td style="text-align:left">Pausa</td></tr>
+      <tr><td>11.00</td><td style="text-align:left">Dimostrazione del carotaggio col succhiello di Pressler</td></tr>
+      <tr><td>11.20</td><td style="text-align:left">Prelievo delle carote (2 per gruppo) e conteggio degli anelli sul posto</td></tr>
+      <tr><td>12.00</td><td style="text-align:left">Confronto dei risultati, discussione, riordino</td></tr>
+      <tr><td>12.30</td><td style="text-align:left">Rientro</td></tr>
+    </table></div>
+  </div>
+
+  <div class="card">
+    <h2>Attività 1 — Cubatura in area di saggio</h2>
+    <ol class="proto">
+      <li><b>Centro.</b> Piantare la picchetta. Registrare le coordinate GPS con lo smartphone e fotografare in
+        quattro direzioni cardinali.</li>
+      <li><b>Perimetro.</b> Un allievo tiene lo zero della cordella al centro e ruota; un secondo segna con nastro
+        biodegradabile gli alberi al limite. In dubbio, si misura la distanza dal centro all'<i>asse</i> del fusto.</li>
+      <li><b>Soglia.</b> Si cavallettano tutti gli alberi con d ≥ 7,5 cm il cui centro cade dentro l'area.</li>
+      <li><b>Diametro.</b> Cavalletto a 1,30 m dal suolo, dal <i>lato a monte</i>. Due misure incrociate a 90°:
+        la media compensa l'ovalizzazione. Asta del cavalletto perpendicolare al fusto e aderente alla corteccia.</li>
+      <li><b>Casi particolari.</b> Albero biforcato sotto 1,30 m = due alberi. Rigonfiamento a 1,30 m: misurare
+        sopra e sotto e mediare. Albero inclinato: 1,30 m lungo l'asse del fusto, dal lato a monte.</li>
+      <li><b>Altezze.</b> Misurare 12–15 alberi distribuiti su tutte le classi diametriche (non solo i più grossi:
+        è l'errore più comune e distorce la curva ipsometrica).</li>
+      <li><b>Chiusura.</b> Verificare che il numero di alberi in scheda coincida con quello contato ad alta voce.</li>
+    </ol>
+    <div class="note"><b>Perché le aree di saggio circolari.</b> Il cerchio ha il minimo perimetro a parità di
+      superficie, quindi il minimo numero di alberi dubbi al confine — che è la principale fonte di errore
+      sistematico. E si materializza con un solo punto e una cordella.</div>
+  </div>
+
+  <div class="card">
+    <h2>Attività 2 — Carotaggio col succhiello di Pressler</h2>
+    <ol class="proto">
+      <li><b>Autorizzazione.</b> Il prelievo va concordato con il proprietario (Regola / Comune / servizio
+        forestale). Non si carota su piante da lasciare a lungo, su piante monumentali o su piante già deperienti.</li>
+      <li><b>Scelta della pianta.</b> Dominante o codominante, fusto diritto, senza carie o resinosità, lontana da
+        strade e da margini. Meglio piante già destinate al taglio.</li>
+      <li><b>Punto di prelievo.</b> A 1,30 m, perpendicolare alla fibratura, <i>puntando al midollo</i>. Su terreno
+        in pendenza si prelieva lungo la curva di livello, mai a monte o a valle (legno di reazione).</li>
+      <li><b>Inserimento.</b> Avvitare con pressione decisa e costante, senza mai invertire il senso di rotazione
+        durante la penetrazione: si spezza il filetto. Profondità obiettivo: poco oltre il centro geometrico.</li>
+      <li><b>Estrazione.</b> Inserire l'estrattore fino in fondo, poi svitare il succhiello di <b>mezzo giro
+        indietro</b> per troncare la carota, quindi estrarre l'estrattore.</li>
+      <li><b>Conservazione.</b> Carota in cannuccia di carta o portacarote, etichettata subito con sigla, data,
+        specie, diametro, esposizione. Le carote si seccano e si deformano in poche ore.</li>
+      <li><b>Cura della pianta.</b> Non tappare il foro, non usare mastici: la pianta compartimenta da sola
+        (modello CODIT). Pulire e oliare il succhiello a fine giornata.</li>
+    </ol>
+    <div class="warnbox"><b>Sicurezza.</b> Il succhiello è un utensile tagliente e la punta è affilatissima.
+      Guanti obbligatori, cappuccio sempre rimesso, mai lasciato a terra nell'erba, mai trasportato senza custodia.
+      Ogni gruppo lavora con un solo succhiello alla volta e con il docente a vista.</div>
+  </div>
+
+  <div class="card">
+    <h2>Conteggio e misura degli anelli</h2>
+    <ol class="proto">
+      <li>Fissare la carota in una scanalatura di legno, con le fibre <b>verticali</b> rispetto al piano di taglio.</li>
+      <li>Rifilare la superficie con lametta o cutter nuovo, poi carteggiare con grana progressiva
+        (120 → 220 → 400): senza una superficie ben preparata gli anelli sottili sono invisibili.</li>
+      <li>Bagnare leggermente o passare gessetto bianco: aumenta il contrasto fra legno primaverile e tardivo.</li>
+      <li>Contare gli anelli dalla corteccia al midollo con lente 10×, segnando un puntino ogni 10 anni e
+        due ogni 50 (convenzione dendrocronologica).</li>
+      <li>Misurare la larghezza di ciascun anello. Con righello millimetrato si arriva a 0,5 mm; fotografando la
+        carota con lo smartphone accanto a un righello e misurando a schermo si arriva a 0,05–0,1 mm.</li>
+      <li>Datare a ritroso: l'anello sotto la corteccia è quello del <b>2026</b> (formato quest'anno,
+        se il prelievo avviene a stagione vegetativa conclusa).</li>
+      <li><b>Cross-dating.</b> Confrontare gli anni con anelli anomali fra le carote dei diversi gruppi. Se due serie
+        non concordano, c'è un anello mancante o falso: si torna alla carota, non si forza il dato.</li>
+    </ol>
+    <div class="note"><b>Età dell'albero ≠ numero di anelli contati.</b> Il conteggio a 1,30 m esclude gli anni
+      impiegati per raggiungere quella quota (in abete rosso in bosco chiuso: 8–20 anni) e la carota difficilmente
+      centra il midollo. L'età vera è quindi sempre <i>maggiore</i> del conteggio.</div>
+  </div>
+
+  <div class="card">
+    <h2>Materiale da portare</h2>
+    <ul class="chk">
+      <li>Cavalletti dendrometrici (1 ogni 4 allievi) e cordelle metriche da 20–30 m</li>
+      <li>Succhielli di Pressler (almeno 2, lunghezza 30–40 cm) + estrattori + olio</li>
+      <li>Cannucce portacarote o cannucce di carta, nastro carta, pennarello indelebile</li>
+      <li>Lente 10×, lamette, carta abrasiva 120/220/400, gessetto bianco</li>
+      <li>Nastro segnaletico biodegradabile, picchetti, bussola</li>
+      <li>Smartphone carichi con app clinometro/ipsometro e GPS — <b>scaricare le mappe offline</b></li>
+      <li>Schede di campo stampate su carta resistente + matite (le penne non scrivono sul bagnato)</li>
+      <li>Cassetta di primo soccorso, guanti da lavoro, scarponi, giacca impermeabile</li>
+      <li>Elenco allievi, recapiti di emergenza, numero unico 112</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Domande da porre in bosco</h2>
+    <details><summary>Perché il diametro si misura proprio a 1,30 m?</summary>
+      <p class="muted">È una convenzione internazionale nata per stare sopra la zona di raccordo con le radici
+        (dove il fusto si allarga in modo irregolare) restando all'altezza del petto di un operatore in piedi.
+        In altri paesi si usa 1,37 m (4,5 piedi): le tavole non sono quindi intercambiabili senza attenzione.</p></details>
+    <details><summary>Perché usiamo il volume del cilindro come termine di paragone?</summary>
+      <p class="muted">Perché il rapporto V/(g·h) — il coefficiente di forma — dice quanto il fusto si discosta da un
+        cilindro. Vale circa 0,45–0,50 nelle conifere di bosco chiuso e scende sotto 0,40 nelle piante cresciute
+        isolate, molto rastremate e ramose. È un indicatore diretto della storia selvicolturale del popolamento.</p></details>
+    <details><summary>Perché gli anelli si stringono man mano che l'albero invecchia?</summary>
+      <p class="muted">Perché la stessa quantità di legno prodotta ogni anno si distribuisce su una circonferenza
+        sempre più lunga. Anche a produzione costante, la larghezza cala. È esattamente il motivo per cui serve
+        la standardizzazione: bisogna togliere questo effetto geometrico prima di cercare il segnale del clima.</p></details>
+    <details><summary>Che cosa vediamo di Vaia e del bostrico?</summary>
+      <p class="muted">Cercare in piedi: schianti da vento non ancora esboscati, chiarie con rinnovazione,
+        cataste; e sulle piante in piedi la <i>rosura</i> rossastra alla base del fusto, i fori di
+        sfarfallamento, la chioma che ingiallisce dall'alto, la corteccia che si stacca a placche scoprendo i
+        <i>ghirigori</i> del bostrico tipografo. Sono la lezione di ecologia forestale più efficace disponibile
+        oggi in Cadore.</p></details>
+  </div>
+</section>
+
+<!-- ============ DATI ============ -->
+<section id="tab-dat" hidden>
+  <div class="card" id="cardInstall">
+    <h2>Installare l'app</h2>
+    <p class="muted">CuboDendro si installa direttamente dal browser: non passa da uno store, non chiede
+      account, non occupa quasi spazio. Una volta installata funziona <b>senza connessione</b>.</p>
+    <button class="act" id="btnInstall" hidden>⤓ Installa CuboDendro</button>
+    <div id="installMsg" class="note" hidden></div>
+    <details open><summary>Android — Chrome</summary>
+      <ol class="proto">
+        <li>Se compare il pulsante verde qui sopra, toccalo: è fatta.</li>
+        <li>Altrimenti tocca <b>⋮</b> in alto a destra → <b>Aggiungi a schermata Home</b> (o <b>Installa app</b>).</li>
+      </ol></details>
+    <details><summary>iPhone — Safari</summary>
+      <ol class="proto">
+        <li>Apri l'app <b>in Safari</b> (su iPhone l'installazione non funziona da Chrome o da altri browser).</li>
+        <li>Tocca il pulsante <b>Condividi</b> — il quadrato con la freccia verso l'alto, in basso al centro.</li>
+        <li>Scorri e scegli <b>Aggiungi a Home</b>, poi <b>Aggiungi</b>.</li>
+      </ol></details>
+    <div class="warnbox"><b>Prova offline la sera prima.</b> Metti il telefono in modalità aereo, apri
+      CuboDendro dall'icona e inserisci due diametri di prova. Se funziona così, funzionerà in bosco.
+      In Val Talagona non c'è campo.</div>
+    <div class="note">L'ipsometro ha bisogno dei sensori di movimento, che i browser concedono solo alle
+      pagine servite in <b>https</b>. Se apri l'app come file scaricato invece che dall'indirizzo web,
+      tutto il resto funziona ma l'inclinometro no.</div>
+  </div>
+
+  <div class="card">
+    <h2>Salvataggio e ripristino</h2>
+    <div class="warnbox">Questa pagina <b>non salva nulla automaticamente</b>. Prima di chiuderla o di
+      ricaricarla, esportare il file di sessione. Sul telefono conviene esportare dopo ogni area di saggio.</div>
+    <div class="row">
+      <button class="act" id="expAll">⬇ Esporta sessione (.json)</button>
+    </div>
+    <div style="margin-top:10px">
+      <label for="impFile">Ripristina una sessione salvata</label>
+      <input id="impFile" type="file" accept=".json,application/json">
+    </div>
+    <div style="margin-top:14px">
+      <label for="impCsv">Importa larghezze anelli da CSV</label>
+      <input id="impCsv" type="file" accept=".csv,text/csv">
+      <p class="muted">Formato atteso: prima riga di intestazione <code>anno,sigla1,sigla2,…</code>,
+        poi una riga per anno con le larghezze in mm. Celle vuote ammesse.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Metodo di standardizzazione — nota tecnica</h2>
+    <p>La larghezza dell'anello dell'anno <i>t</i> nell'albero <i>i</i> si scompone in
+      <span class="eqn" style="display:inline;padding:2px 6px">R<sub>it</sub> = A<sub>it</sub> + C<sub>t</sub> + δD1<sub>t</sub> + δD2<sub>it</sub> + E<sub>it</sub></span>
+      (modello aggregato di Cook, 1987): <b>A</b> = tendenza legata all'età, <b>C</b> = segnale climatico comune,
+      <b>D1</b> e <b>D2</b> = disturbi di popolamento ed individuali, <b>E</b> = rumore. La dendroclimatologia
+      vuole isolare <b>C</b>, quindi deve rimuovere <b>A</b>.</p>
+    <p>Si adatta a ciascuna serie una curva <b>g<sub>t</sub></b> che descriva solo la tendenza lenta, e si calcola
+      l'indice <b>I<sub>t</sub> = R<sub>t</sub> / g<sub>t</sub></b>. Il rapporto (e non la differenza) è preferito
+      perché la varianza degli anelli cresce proporzionalmente alla loro larghezza: dividere stabilizza la varianza
+      e rende confrontabili alberi giovani e vecchi. Gli indici hanno media 1 e sono adimensionali.</p>
+    <table>
+      <tr><th style="text-align:left">Curva g<sub>t</sub></th><th style="text-align:left">Quando si usa</th></tr>
+      <tr><td style="text-align:left">Esponenziale negativa<br><span class="muted">g = a·e<sup>−bt</sup> + k</span></td>
+        <td style="text-align:left">Piante cresciute in bosco chiuso senza disturbi, serie con il classico
+          decadimento giovanile. È la curva "storica" (Fritts). Conserva la variabilità a bassa frequenza.</td></tr>
+      <tr><td style="text-align:left">Retta di regressione</td>
+        <td style="text-align:left">Quando l'esponenziale non converge o la serie è già in fase adulta. Ammessa solo
+          con pendenza negativa o nulla.</td></tr>
+      <tr><td style="text-align:left">Spline cubica<br><span class="muted">rigidità = 2/3 della lunghezza della serie</span></td>
+        <td style="text-align:left">Lo standard attuale. Segue anche le tendenze non monotone dovute ai diradamenti.
+          Più corta è la finestra, più segnale a bassa frequenza si perde: con 31 anni si trattiene bene la
+          variabilità interannuale, che è quella che ci interessa.</td></tr>
+      <tr><td style="text-align:left">Media mobile centrata</td>
+        <td style="text-align:left">Approssimazione didattica della spline, calcolabile a mano o in un foglio di
+          calcolo. È il metodo consigliato per la classe.</td></tr>
+      <tr><td style="text-align:left">RCS — <i>Regional Curve Standardization</i></td>
+        <td style="text-align:left">Si costruisce un'unica curva età/larghezza mediando molte piante allineate per
+          età cambiale. Conserva i trend secolari, ma richiede decine di serie: fuori portata per una mattinata.</td></tr>
+    </table>
+    <h3>Dopo la standardizzazione</h3>
+    <ol class="proto">
+      <li>Gli indici delle singole serie si mediano anno per anno (media robusta o biweight) ottenendo la
+        <b>cronologia</b> di sito.</li>
+      <li>Si controlla la qualità con <b>r&#772;</b> (correlazione media fra serie) e con l'<b>EPS</b>
+        = n·r&#772; / (1 + (n−1)·r&#772;). Si considera affidabile una cronologia con EPS ≥ 0,85.</li>
+      <li>Si calcola la <b>sensibilità media</b>, misura della variabilità da un anno all'altro: valori alti
+        indicano una pianta che "risponde" al clima, valori bassi una pianta complacente.</li>
+      <li>Si correla la cronologia con le variabili climatiche mensili e stagionali
+        (<i>response function</i> / <i>correlation function</i>).</li>
+    </ol>
+    <div class="note"><b>Che cosa aspettarsi in Cadore.</b> L'abete rosso di quota in ambiente alpino è
+      tendenzialmente limitato dalla <b>temperatura estiva</b>: ci si attende una correlazione positiva con le
+      temperature di giugno–agosto, tanto più marcata quanto più si sale di quota. Alle quote basse e sui versanti
+      caldi e superficiali può prevalere invece il segnale <b>idrico</b>, con correlazione positiva con le
+      precipitazioni estive e negativa con le temperature. Se la classe rileva a quote diverse, il confronto fra i
+      due segnali è la parte più interessante del lavoro.</div>
+  </div>
+
+  <div class="card">
+    <h2>Crediti, fonti e licenze</h2>
+    <div class="credits">
+      <p><b>CuboDendro</b> — versione 3.2<br>
+        Ideazione e sviluppo: <b>prof. Gianluca Simonetti</b><br>
+        Dirigente scolastico: <b>dott.ssa Roberta Gasparini</b><br>
+        Realizzata per l'<b>Istituto di Istruzione Superiore «8 Marzo – K. Lorenz»</b> di Mirano (VE),
+        Istituto Tecnico Agrario, per l'uscita didattica di dendrometria e dendrocronologia a
+        Domegge di Cadore.</p>
+
+      <h3>Equazioni di cubatura</h3>
+      <p>Tabacchi G., Di Cosmo L., Gasparini P., Morelli S. (2011). <i>Stima del volume e della fitomassa
+        delle principali specie forestali italiane. Equazioni di previsione, tavole del volume e tavole
+        della fitomassa arborea epigea.</i> Consiglio per la Ricerca e la sperimentazione in Agricoltura,
+        Unità di ricerca per il Monitoraggio e la Pianificazione Forestale, Trento.<br>
+        Sono le equazioni ufficiali dell'Inventario Nazionale delle Foreste e dei Serbatoi Forestali di
+        Carbonio (INFC). L'app non riproduce le tavole stampate: ricalcola i volumi dalle equazioni
+        pubblicate, citando la fonte.</p>
+
+      <h3>Dati climatici</h3>
+      <p>Serie di temperatura e precipitazione 1950–2025 per Domegge di Cadore, dalla rianalisi
+        <b>ERA5-Land</b> del Copernicus Climate Change Service (C3S) / ECMWF, ottenute tramite
+        <b>Open-Meteo</b> — <span class="muted">open-meteo.com</span> — dati distribuiti con licenza
+        Creative Commons Attribution 4.0 (CC BY 4.0).<br>
+        <i>Generated using Copernicus Climate Change Service information (2026). Weather data by Open-Meteo.com.</i><br>
+        Né il C3S né l'ECMWF rispondono dell'uso che qui se ne fa.</p>
+
+      <h3>Metodo dendrocronologico</h3>
+      <p>Cook E.R. (1987), <i>The decomposition of tree-ring series for environmental studies</i>,
+        Tree-Ring Bulletin 47.  ·  Fritts H.C. (1976), <i>Tree Rings and Climate</i>, Academic Press.  ·
+        Wigley T.M.L., Briffa K.R., Jones P.D. (1984), per la definizione dell'EPS.</p>
+
+      <h3>Cartografia</h3>
+      <p>Lo sfondo cartografico facoltativo della mappa dell'area di saggio usa dati
+        <b>© OpenStreetMap contributors</b>, licenza ODbL 1.0 — <span class="muted">openstreetmap.org/copyright</span>.
+        È l'unica funzione dell'app che contatta un server esterno, ed è disattivata di partenza.</p>
+
+      <h3>Accuratezza del posizionamento</h3>
+      <p>Tomaštík J., Chudá J., Tunák D., Chudý F., Kardoš M. (2021). <i>Advances in smartphone positioning
+        in forests: dual-frequency receivers and raw GNSS data.</i> Forestry 94(2): 292–310.</p>
+
+      <h3>Trattamento dei dati</h3>
+      <p>L'app <b>non raccoglie, non trasmette e non conserva</b> alcun dato personale. Tutto ciò che
+        inserisci resta nella memoria temporanea del browser e sparisce chiudendo la pagina, salvo quello
+        che esporti tu. Non usa cookie, non usa la memoria persistente del browser, non incorpora strumenti
+        di analisi. L'unica comunicazione verso l'esterno è il download delle mattonelle cartografiche,
+        se e quando attivi tu lo sfondo della mappa.</p>
+
+      <h3>Sensori e permessi</h3>
+      <p><b>Accelerometro</b> — letto solo mentre usi l'ipsometro, dopo un tocco esplicito e il consenso
+        di sistema. Le letture non escono dal dispositivo.<br>
+        <b>Posizione</b> — usata solo nella scheda Area, su tua richiesta. Le coordinate restano sul
+        dispositivo e si possono esportare solo manualmente.<br>
+        <b>Fotocamera</b> — usata solo come mirino dell'ipsometro (immagine mai registrata) e per la
+        fotografia della carota che scegli tu, elaborata interamente sul dispositivo.<br>
+        Nessuno dei tre permessi viene chiesto all'avvio: solo quando serve, e ognuno è revocabile
+        dalle impostazioni del sistema.</p>
+
+      <p style="margin-top:14px"><a href="privacy.html" style="color:var(--brand);font-weight:600">Informativa privacy completa</a></p>
+      <p class="muted">Software distribuito a scopo didattico. Le stime prodotte hanno finalità formativa e
+        non sostituiscono un rilievo dendrometrico professionale né un piano di assestamento.</p>
+    </div>
+  </div>
+</section>

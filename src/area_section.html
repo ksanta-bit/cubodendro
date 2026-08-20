@@ -1,0 +1,151 @@
+<!-- ============ AREA DI SAGGIO / GPS ============ -->
+<section id="tab-are" hidden>
+  <div class="card">
+    <h2>1 · Centro dell'area di saggio</h2>
+    <div id="gpsGate">
+      <p class="muted">Il telefono registra le coordinate del punto in cui sei, mediando molte letture
+        per migliorare la precisione. Serve il permesso di accesso alla posizione.</p>
+      <button class="act" id="gpsStart">📍 Registra il centro</button>
+      <div id="gpsErr" class="warnbox" hidden></div>
+    </div>
+
+    <div id="gpsAcq" hidden>
+      <div class="acq">
+        <div class="acq-ring"><svg viewBox="0 0 120 120"><circle class="acq-bg" cx="60" cy="60" r="52"/>
+          <circle class="acq-fg" id="acqArc" cx="60" cy="60" r="52"/></svg>
+          <div class="acq-n"><span id="acqCount">0</span><small>letture</small></div></div>
+        <div class="acq-txt">
+          <b>Acquisizione in corso</b>
+          <div class="muted">Resta fermo sul punto centrale. Bastano una ventina di secondi.</div>
+          <div class="muted" style="margin-top:6px">Precisione corrente: <b id="acqAcc">—</b></div>
+        </div>
+      </div>
+      <button class="ghost" id="gpsStop" style="margin-top:10px">Ferma e usa quello che ho</button>
+    </div>
+
+    <div id="gpsDone" hidden>
+      <div class="tiles">
+        <div class="tile"><div class="k">Latitudine</div><div class="v sm" id="cLat">—</div></div>
+        <div class="tile"><div class="k">Longitudine</div><div class="v sm" id="cLon">—</div></div>
+        <div class="tile"><div class="k">Precisione</div><div class="v" id="cAcc">—</div><div class="u">m</div></div>
+        <div class="tile"><div class="k">Quota</div><div class="v" id="cAlt">—</div><div class="u">m s.l.m.</div></div>
+      </div>
+      <div class="muted" style="margin-top:8px">Media di <b id="cN">—</b> <span id="cNlab">letture</span> · registrato alle <span id="cT">—</span></div>
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" id="gpsAgain">↻ Rifai il centro</button>
+        <button class="ghost" id="gpsCopy">⧉ Copia coordinate</button>
+      </div>
+    </div>
+  </div>
+
+
+  <figure class="figbox"><svg class="fig" viewBox="0 0 380 300" role="img" aria-label="Area di saggio dall'alto con alberi dentro, fuori e al confine" xmlns="http://www.w3.org/2000/svg"><defs><marker id="ak" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--text-primary)"/></marker><marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--series-2)"/></marker><marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--series-1)"/></marker><marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--brand)"/></marker></defs><circle cx="190" cy="148" r="118" fill="var(--brand)" fill-opacity=".07" stroke="var(--brand)" stroke-width="2.4"/><line x1="190" y1="148" x2="308" y2="148" stroke="var(--brand)" stroke-width="1.4" stroke-dasharray="5 4"/><text x="249.0" y="140.0" text-anchor="middle" font-size="10.5" fill="var(--brand)" font-weight="800">raggio</text><circle cx="190" cy="148" r="6.5" fill="var(--brand)" stroke="var(--surface-1)" stroke-width="2"/><text x="190.0" y="170.0" text-anchor="middle" font-size="10" fill="var(--brand)" font-weight="700">centro</text><circle cx="124" cy="96" r="8" fill="var(--good)" fill-opacity=".2" stroke="var(--good)" stroke-width="2"/><circle cx="124" cy="96" r="2.6" fill="var(--good)"/><circle cx="226" cy="78" r="8" fill="var(--good)" fill-opacity=".2" stroke="var(--good)" stroke-width="2"/><circle cx="226" cy="78" r="2.6" fill="var(--good)"/><circle cx="158" cy="206" r="8" fill="var(--good)" fill-opacity=".2" stroke="var(--good)" stroke-width="2"/><circle cx="158" cy="206" r="2.6" fill="var(--good)"/><circle cx="264" cy="188" r="8" fill="var(--good)" fill-opacity=".2" stroke="var(--good)" stroke-width="2"/><circle cx="264" cy="188" r="2.6" fill="var(--good)"/><circle cx="96" cy="176" r="8" fill="var(--good)" fill-opacity=".2" stroke="var(--good)" stroke-width="2"/><circle cx="96" cy="176" r="2.6" fill="var(--good)"/><circle cx="204" cy="244" r="8" fill="var(--good)" fill-opacity=".2" stroke="var(--good)" stroke-width="2"/><circle cx="204" cy="244" r="2.6" fill="var(--good)"/><circle cx="32" cy="60" r="8" fill="var(--bad)" fill-opacity=".2" stroke="var(--bad)" stroke-width="2"/><circle cx="32" cy="60" r="2.6" fill="var(--bad)"/><circle cx="340" cy="52" r="8" fill="var(--bad)" fill-opacity=".2" stroke="var(--bad)" stroke-width="2"/><circle cx="340" cy="52" r="2.6" fill="var(--bad)"/><circle cx="336" cy="246" r="8" fill="var(--bad)" fill-opacity=".2" stroke="var(--bad)" stroke-width="2"/><circle cx="336" cy="246" r="2.6" fill="var(--bad)"/><circle cx="40" cy="234" r="8" fill="var(--bad)" fill-opacity=".2" stroke="var(--bad)" stroke-width="2"/><circle cx="40" cy="234" r="2.6" fill="var(--bad)"/><circle cx="76" cy="114" r="27" fill="var(--amber)" fill-opacity=".14" stroke="var(--amber)" stroke-dasharray="3 3"/><circle cx="76" cy="114" r="8" fill="var(--amber)" fill-opacity=".2" stroke="var(--amber)" stroke-width="2"/><circle cx="76" cy="114" r="2.6" fill="var(--amber)"/><circle cx="252" cy="48" r="27" fill="var(--amber)" fill-opacity=".14" stroke="var(--amber)" stroke-dasharray="3 3"/><circle cx="252" cy="48" r="8" fill="var(--amber)" fill-opacity=".2" stroke="var(--amber)" stroke-width="2"/><circle cx="252" cy="48" r="2.6" fill="var(--amber)"/><text x="190.0" y="292.0" text-anchor="middle" font-size="10" fill="var(--text-muted)" font-weight="600">area di saggio vista dall'alto</text></svg><figcaption><b>Quali alberi entrano nel conteggio.</b> Si cavalletta ogni albero il cui <b>centro del fusto a 1,30 m</b> cade dentro il cerchio — in <span class="cIn">verde</span>. Quelli in <span class="cOut">rosso</span> restano fuori e non si contano. Gli alberi in <span class="cEdge">ambra</span> sono a cavallo del confine: lì il GPS non basta e decide la cordella, misurando dal centro dell'area all'asse del fusto. Il cerchio ha il perimetro più corto a parità di superficie, quindi il minor numero di casi dubbi: è la ragione per cui in dendrometria le aree di saggio sono circolari.</figcaption></figure>
+
+    <div class="card" id="cardVer" hidden>
+    <h2>2 · L'albero è dentro o fuori?</h2>
+    <div class="verdict" id="verBox">
+      <div class="verdict-badge" id="verBadge">—</div>
+      <div class="verdict-d"><span id="verDist">—</span> <small>m dal centro</small></div>
+      <div class="verdict-sub">raggio dell'area <b id="verR">13,0</b> m · precisione GPS ± <b id="verAcc">—</b> m</div>
+    </div>
+    <div id="verHint"></div>
+    <div class="row" style="margin-top:10px">
+      <button class="ghost" id="gpsTrail">Traccia il percorso: <b id="trailState">off</b></button>
+      <button class="ghost" id="gpsPause">⏸ Sospendi GPS</button>
+    </div>
+    <div class="note"><b>La cordella resta lo strumento che decide.</b> Con la copertura delle chiome
+      l'errore del GPS di un telefono comune può arrivare a 10 m e oltre: su un raggio di 13 m è tanto.
+      Usa questa schermata per orientarti e per capire quanto vale davvero un sensore, non per aggiudicare
+      gli alberi al confine.</div>
+  </div>
+
+  <div class="card" id="cardMap" hidden>
+    <h2>3 · Mappa dell'area</h2>
+    <div class="maptools">
+      <label class="switch"><input type="checkbox" id="mapBase"><span></span>Sfondo cartografico</label>
+      <span class="muted" id="mapBaseNote">richiede connessione</span>
+    </div>
+    <div class="mapwrap" id="mapWrap">
+      <div class="maptiles" id="mapTiles"></div>
+      <svg class="mapover" id="mapOver" viewBox="0 0 360 360" preserveAspectRatio="xMidYMid meet"></svg>
+      <div class="mapscale" id="mapScale"></div>
+      <div class="mapattr" id="mapAttr" hidden>© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</div>
+    </div>
+    <div class="legend" style="margin-top:8px">
+      <span><i class="sw" style="background:var(--brand)"></i>centro</span>
+      <span><i class="sw" style="background:var(--series-1)"></i>la tua posizione</span>
+      <span><i class="sw" style="background:var(--series-1);opacity:.25"></i>incertezza GPS</span>
+      <span><i class="sw" style="background:var(--series-2)"></i>percorso</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Quanto ci si può fidare</h2>
+    <p>Uno studio pubblicato su <i>Forestry</i> (Oxford) ha confrontato smartphone e ricevitori professionali
+      sotto copertura forestale. Ecco i numeri, che vale la pena mostrare alla classe.</p>
+    <div class="scroll"><table>
+      <tr><th style="text-align:left">Condizione</th><th>Errore quadratico medio</th></tr>
+      <tr><td style="text-align:left">Telefono a singola frequenza, bosco con foglie</td><td>5,4 – 12,5 m</td></tr>
+      <tr><td style="text-align:left">Telefono a singola frequenza, bosco senza foglie</td><td>4,1 – 11,4 m</td></tr>
+      <tr><td style="text-align:left">Telefono a doppia frequenza (L1+L5)</td><td>paragonabile a un ricevitore professionale</td></tr>
+      <tr><td style="text-align:left">In movimento, tracciamento del percorso</td><td>1,2 – 6,0 m</td></tr>
+    </table></div>
+    <p class="muted" style="margin-top:8px">Tomaštík J. et al. (2021), <i>Advances in smartphone positioning in
+      forests: dual-frequency receivers and raw GNSS data</i>, Forestry 94(2): 292–310.</p>
+
+  <figure class="figbox"><svg class="fig" viewBox="0 0 380 268" role="img" aria-label="Il cerchio di incertezza del GPS a cavallo del confine" xmlns="http://www.w3.org/2000/svg"><defs><marker id="ak" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--text-primary)"/></marker><marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--series-2)"/></marker><marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--series-1)"/></marker><marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--brand)"/></marker></defs><circle cx="128" cy="126" r="96" fill="var(--brand)" fill-opacity=".06" stroke="var(--brand)" stroke-width="2.4"/><text x="114.0" y="248.0" text-anchor="middle" font-size="10.5" fill="var(--brand)" font-weight="800">confine dell'area di saggio</text><circle cx="202" cy="78" r="56" fill="var(--series-1)" fill-opacity=".17" stroke="var(--series-1)" stroke-opacity=".55" stroke-dasharray="4 3"/><line x1="202" y1="78" x2="162" y2="112" stroke="var(--bad)" stroke-width="1.4" stroke-dasharray="3 3"/><circle cx="202" cy="78" r="7.5" fill="var(--series-1)" stroke="var(--surface-1)" stroke-width="2.4"/><circle cx="162" cy="112" r="5.5" fill="var(--bad)"/><text x="370.0" y="40.0" text-anchor="end" font-size="10.5" fill="var(--series-1)" font-weight="800">letto dal GPS</text><line x1="348.0" y1="48.0" x2="220.0" y2="62.0" stroke="var(--series-1)" stroke-width="1.4" marker-end="url(#ab)"/><text x="368.0" y="200.0" text-anchor="end" font-size="10.5" fill="var(--bad)" font-weight="800">posizione vera</text><line x1="296.0" y1="192.0" x2="172.0" y2="122.0" stroke="var(--bad)" stroke-width="1.4" marker-end="url(#ak)"/></svg><figcaption><b>Perché al confine il GPS non decide.</b> Il cerchio azzurro è l'incertezza dichiarata dal ricevitore: la posizione vera cade lì dentro con probabilità di circa il 68%, e una volta su tre sta anche più lontano. Quando quel cerchio è a cavallo del confine, il sensore non può dire da che parte sei. Sotto le chiome un telefono comune sbaglia di 5–12 m, su un raggio di 13 m: ecco perché la cordella resta lo strumento che decide, e il GPS serve a registrare il centro dell'area e a ritrovarlo, non ad aggiudicare gli alberi.</figcaption></figure>
+
+      <h3>Tre cose da far notare in bosco</h3>
+    <ol class="proto">
+      <li><b>La precisione dichiarata migliora stando fermi.</b> Guardate il numero scendere nei primi
+        venti secondi: è il ricevitore che accumula satelliti e affina la soluzione. È il motivo per cui
+        il centro si registra mediando molte letture invece di prenderne una sola.</li>
+      <li><b>Peggiora sotto le chiome e vicino ai versanti.</b> Provate a leggere la precisione in una
+        chiaria e poi sotto una pecceta chiusa: il salto si vede subito.</li>
+      <li><b>Il numero dichiarato non è l'errore massimo.</b> È il raggio entro cui la posizione vera cade
+        con probabilità di circa il 68%. Una volta su tre siete più lontani di così.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>Il tuo telefono è preciso abbastanza?</h2>
+    <p>I telefoni con GNSS <b>a doppia frequenza (L1+L5)</b> sono nettamente più precisi sotto le chiome:
+      arrivano a competere con un ricevitore professionale, mentre quelli a singola frequenza sbagliano
+      di 5–12 m. Sapere in che categoria sei cambia il modo in cui usi questa scheda.</p>
+
+    <h3>Provalo davvero — 30 secondi, all'aperto</h3>
+    <p class="muted">Il test misura la precisione che il tuo telefono riesce effettivamente a raggiungere.
+      Vale più di qualunque elenco: le liste invecchiano, il tuo telefono no.</p>
+    <button class="act" id="gnssTest">▶ Avvia il test di precisione</button>
+    <div id="gnssRun" hidden>
+      <div class="acq" style="margin-top:12px">
+        <div class="acq-ring"><svg viewBox="0 0 120 120"><circle class="acq-bg" cx="60" cy="60" r="52"/>
+          <circle class="acq-fg" id="tstArc" cx="60" cy="60" r="52"/></svg>
+          <div class="acq-n"><span id="tstSec">30</span><small>secondi</small></div></div>
+        <div class="acq-txt"><b>Misura in corso</b>
+          <div class="muted">Stai fermo, a cielo aperto, con il telefono in mano.</div>
+          <div class="muted" style="margin-top:6px">Migliore finora: <b id="tstBest">—</b></div></div>
+      </div>
+    </div>
+    <div id="gnssRes" hidden></div>
+
+    <h3>Elenco indicativo dei modelli a doppia frequenza</h3>
+    <div class="warnbox">Aggiornato ad agosto 2026 e <b>necessariamente incompleto</b>: escono modelli nuovi
+      di continuo e alcune varianti regionali dello stesso modello differiscono. In caso di dubbio vale il
+      test qui sopra, non l'elenco.</div>
+    <div class="scroll"><table>
+      <tr><th style="text-align:left">Marca</th><th style="text-align:left">Modelli con L1+L5</th></tr>
+      <tr><td style="text-align:left"><b>Apple</b></td><td style="text-align:left">iPhone 14 Pro e Pro Max e i modelli Pro successivi — Apple li indica nelle specifiche come «GPS a doppia frequenza di precisione». I modelli base della stessa generazione in genere non lo hanno: controlla la scheda tecnica del tuo</td></tr>
+      <tr><td style="text-align:left"><b>Samsung</b></td><td style="text-align:left">Galaxy S10+ (alcune varianti), Note 10 e 10+, S20 / S20+ / S20 Ultra, S21+ e S21 Ultra, e in genere i modelli di fascia alta successivi</td></tr>
+      <tr><td style="text-align:left"><b>Google</b></td><td style="text-align:left">Pixel 4 e 4 XL, Pixel 5 e successivi. I Pixel 3 e 3a <b>non</b> lo hanno</td></tr>
+      <tr><td style="text-align:left"><b>Xiaomi</b></td><td style="text-align:left">Mi 8 (il primo al mondo, 2018), Mi Mix 3, Mi 9, Mi 9T Pro e successivi di fascia alta</td></tr>
+      <tr><td style="text-align:left"><b>Huawei</b></td><td style="text-align:left">Mate 20 e 20 Pro, P30 e P30 Pro</td></tr>
+      <tr><td style="text-align:left"><b>OnePlus</b></td><td style="text-align:left">7 e 7 Pro, 7T, 8 e 8 Pro</td></tr>
+      <tr><td style="text-align:left"><b>Altri</b></td><td style="text-align:left">Oppo Reno e Find X2, Honor View 20, Asus ZenFone 6, Lenovo Z6 Pro, Realme X50 Pro</td></tr>
+    </table></div>
+    <p class="muted" style="margin-top:8px">Su Android si può avere la conferma definitiva installando
+      l'app gratuita <b>GPSTest</b>: nella colonna «CF» compaiono i valori <b>L5</b> o <b>E5a</b> se il
+      telefono riceve la seconda frequenza. Su iPhone questa informazione non è accessibile alle app,
+      quindi resta valido il test di precisione qui sopra.</p>
+  </div>
+</section>

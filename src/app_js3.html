@@ -1,0 +1,133 @@
+<script>
+"use strict";
+/* ============================================================
+   PARTE C — TAVOLE, ESPORTAZIONI, AVVIO
+   ============================================================ */
+
+/* ---------- calcolatore singolo albero ---------- */
+function redrawTav(){
+  const sp=$('tvSp').value, d=num($('tvD').value), h=num($('tvH').value);
+  const c=spByName[sp];
+  if(d>0&&h>0){
+    const v=volume(sp,d,h), g=basimetrica(d), cyl=g*h;
+    $('tvV').textContent=fmt(v,3); $('tvG').textContent=fmt(g,4);
+    $('tvF').textContent=fmt(v/cyl,3); $('tvC').textContent=fmt(cyl,3);
+    const it=function(x,n){ return x.toFixed(n).replace('.',','); };
+    $('tvEq').textContent='v = '+it(c.b1,4)+' + '+it(c.b2,6)+' × '+it(d,1)+'² × '+it(h,1)+
+      ' + '+it(c.b3,4)+' × '+it(d,1)+'  =  '+it(v*1000,1)+' dm³  =  '+it(v,3)+' m³';
+  } else { ['tvV','tvG','tvF','tvC'].forEach(function(i){$(i).textContent='—';}); $('tvEq').textContent=''; }
+  /* pendenza */
+  const a=num($('pdG').value), r=num($('pdR').value);
+  $('pdOut').textContent = (isFinite(a)&&isFinite(r)) ? fmt(r/Math.cos(a*Math.PI/180),2) : '—';
+  /* tavola a doppia entrata */
+  const sp2=$('dtSp').value;
+  const hs=[]; for(let h2=8;h2<=40;h2+=2) hs.push(h2);
+  let t='<tr><th style="text-align:left">d (cm) \\ h (m)</th>'+hs.map(function(h2){return '<th>'+h2+'</th>';}).join('')+'</tr>';
+  for(let d2=10; d2<=85; d2+=5){
+    t+='<tr><td style="text-align:left"><b>'+d2+'</b></td>'+hs.map(function(h2){
+      return '<td>'+fmt(volume(sp2,d2,h2),3)+'</td>'; }).join('')+'</tr>';
+  }
+  $('tabDouble').innerHTML=t;
+  /* coefficienti */
+  let tc='<tr><th style="text-align:left">Specie</th><th style="text-align:left">Nome scientifico</th><th>b1</th><th>b2</th><th>b3</th></tr>';
+  SPECIE.forEach(function(x){ tc+='<tr><td style="text-align:left">'+x.n+'</td><td style="text-align:left"><i>'+x.s+
+    '</i></td><td>'+x.b1.toFixed(4)+'</td><td>'+x.b2.toExponential(4)+'</td><td>'+x.b3.toFixed(4)+'</td></tr>'; });
+  $('tabCoef').innerHTML=tc;
+}
+['tvSp','tvD','tvH','dtSp','pdG','pdR'].forEach(function(id){
+  $(id).addEventListener('input',redrawTav); $(id).addEventListener('change',redrawTav); });
+$('prnTav').addEventListener('click',function(){ window.print(); });
+
+/* ---------- esportazioni ---------- */
+function download(name, text, mime){
+  const blob=new Blob(["﻿"+text],{type:(mime||'text/csv')+';charset=utf-8'});
+  const url=URL.createObjectURL(blob), a=document.createElement('a');
+  a.href=url; a.download=name; document.body.appendChild(a); a.click();
+  setTimeout(function(){ URL.revokeObjectURL(url); a.remove(); },400);
+}
+function stamp(){ const d=new Date();
+  return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')+'_'+
+         String(d.getHours()).padStart(2,'0')+String(d.getMinutes()).padStart(2,'0'); }
+
+$('expCub').addEventListener('click',function(){
+  const ip=curvaIpso(), F=fattore();
+  let csv='n;area_saggio;gruppo;specie;d1_cm;d2_cm;d_medio_cm;h_misurata_m;h_usata_m;g_m2;V_m3;fattore_ha\n';
+  S.trees.forEach(function(t,i){ const h=altezza(t,ip);
+    csv+=[i+1,t.ads,t.gr,t.sp,t.d1,t.d2===null?'':t.d2,t.d.toFixed(2),t.h===null?'':t.h,
+      isFinite(h)?h.toFixed(2):'',basimetrica(t.d).toFixed(5),isFinite(h)?volume(t.sp,t.d,h).toFixed(4):'',
+      F.toFixed(3)].join(';')+'\n'; });
+  download('cubatura_domegge_'+stamp()+'.csv',csv.replace(/\./g,','));
+});
+$('expDen').addEventListener('click',function(){
+  const ch=buildChron();
+  let csv='anno';
+  S.cores.forEach(function(c){ csv+=';'+c.id; });
+  csv+=';RWI_medio;n_serie\n';
+  if(ch){
+    for(let i=ch.years.length-1;i>=0;i--){
+      const y=ch.years[i]; let row=String(y);
+      S.cores.forEach(function(c){ const k=c.y0-y; row+=';'+((k>=0&&k<c.w.length)?String(c.w[k]):''); });
+      row+=';'+(isFinite(ch.chron[i])?ch.chron[i].toFixed(4):'')+';'+ch.nser[i];
+      csv+=row+'\n';
+    }
+  }
+  download('anelli_domegge_'+stamp()+'.csv',csv.replace(/\./g,','));
+});
+$('expAll').addEventListener('click',function(){
+  download('sessione_domegge_'+stamp()+'.json', JSON.stringify({
+    v:1, data:new Date().toISOString(), raggio:$('raggio').value, soglia:$('soglia').value,
+    trees:S.trees, cores:S.cores},null,1), 'application/json');
+});
+$('impFile').addEventListener('change',function(e){
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=function(){ try{ const o=JSON.parse(r.result);
+    S.trees=o.trees||[]; S.cores=o.cores||[]; S.active=S.cores.length?S.cores[0].id:null;
+    if(o.raggio) $('raggio').value=o.raggio; if(o.soglia) $('soglia').value=o.soglia;
+    redrawAll(); alert('Sessione ripristinata: '+S.trees.length+' alberi, '+S.cores.length+' carote.');
+  }catch(err){ alert('File non leggibile: '+err.message); } };
+  r.readAsText(f); e.target.value='';
+});
+$('impCsv').addEventListener('change',function(e){
+  const f=e.target.files[0]; if(!f) return;
+  const r=new FileReader();
+  r.onload=function(){
+    try{
+      const lines=r.result.split(/\r?\n/).filter(function(l){return l.trim();});
+      const sep = (lines[0].split(';').length>lines[0].split(',').length)?';':',';
+      const head=lines[0].split(sep).map(function(x){return x.trim();});
+      const ids=head.slice(1);
+      const data=ids.map(function(){return [];});
+      const years=[];
+      for(let i=1;i<lines.length;i++){
+        const p=lines[i].split(sep);
+        const y=parseInt(p[0],10); if(!isFinite(y)) continue;
+        years.push(y);
+        for(let j=0;j<ids.length;j++){
+          const v=parseFloat(String(p[j+1]||'').replace(',','.'));
+          data[j].push(isFinite(v)?v:null);
+        }
+      }
+      const desc = years.length>1 && years[0]>years[1];
+      ids.forEach(function(id,j){
+        const pairs=years.map(function(y,i){return [y,data[j][i]];}).filter(function(p){return p[1]!==null;});
+        if(!pairs.length) return;
+        pairs.sort(function(a,b){return b[0]-a[0];});
+        const ex=coreById(id);
+        const obj={id:id, y0:pairs[0][0], w:pairs.map(function(p){return p[1];})};
+        if(ex){ ex.y0=obj.y0; ex.w=obj.w; } else S.cores.push(obj);
+      });
+      S.active=S.cores.length?S.cores[0].id:null;
+      redrawAll(); alert('Importate '+ids.length+' serie.');
+    }catch(err){ alert('CSV non leggibile: '+err.message); }
+  };
+  r.readAsText(f); e.target.value='';
+});
+
+/* ---------- avvio ---------- */
+function redrawAll(){ redrawCub(); redrawDen(); redrawTav(); }
+window.addEventListener('beforeunload',function(e){
+  if(S.trees.length||S.cores.length){ e.preventDefault(); e.returnValue=''; }
+});
+redrawAll();
+</script>

@@ -1,0 +1,348 @@
+<!-- ============ CUBATURA ============ -->
+<section id="tab-cub" hidden>
+  <div class="card">
+    <h2>1 · Area di saggio</h2>
+    <div class="grid g3">
+      <div><label for="raggio">Raggio (m)</label>
+        <select id="raggio">
+          <option value="9">9,00 m — 254 m²</option>
+          <option value="13" selected>13,00 m — 531 m²</option>
+          <option value="15">15,00 m — 707 m²</option>
+          <option value="12.62">12,62 m — 500 m²</option>
+          <option value="17.84">17,84 m — 1000 m²</option>
+        </select></div>
+      <div><label for="soglia">Soglia di cavallettamento (cm)</label>
+        <input id="soglia" type="number" inputmode="decimal" value="7.5" step="0.5"></div>
+      <div><label for="adsName">Area di saggio in corso</label>
+        <input id="adsName" type="text" value="AdS 1"></div>
+    </div>
+    <div class="tiles" style="margin-top:12px">
+      <div class="tile"><div class="k">Superficie</div><div class="v" id="tSup">531</div><div class="u">m²</div></div>
+      <div class="tile"><div class="k">Fattore a ettaro</div><div class="v" id="tFatt">18,8</div><div class="u">×</div></div>
+      <div class="tile"><div class="k">Alberi inseriti</div><div class="v" id="tN">0</div><div class="u">n</div></div>
+    </div>
+    <div class="note">Il raggio va misurato in <b>proiezione orizzontale</b>.    <details><summary>Come si sceglie il raggio</summary>
+      <p>Il raggio decide quanti alberi finiscono in un'area, e quindi il compromesso fra tempo e
+        precisione. La regola pratica è puntare a <b>15–30 piante per area</b>: sotto le dieci la stima
+        diventa molto instabile, sopra le quaranta si perde tempo senza guadagnare quasi nulla.</p>
+      <div class="scroll"><table>
+        <tr><th style="text-align:left">Raggio</th><th>Superficie</th><th>Fattore</th><th style="text-align:left">Quando</th></tr>
+        <tr><td style="text-align:left">9,00 m</td><td>254 m²</td><td>39,4</td><td style="text-align:left">Perticaie e giovani fustaie molto dense, oltre 800 piante/ha</td></tr>
+        <tr><td style="text-align:left">12,62 m</td><td>500 m²</td><td>20,0</td><td style="text-align:left">Valore tondo: il fattore 20 si moltiplica a mente</td></tr>
+        <tr><td style="text-align:left">13,00 m</td><td>531 m²</td><td>18,8</td><td style="text-align:left">La scelta consigliata in pecceta adulta del Cadore</td></tr>
+        <tr><td style="text-align:left">15,00 m</td><td>707 m²</td><td>14,1</td><td style="text-align:left">Fustaie mature rade, sotto le 300 piante/ha</td></tr>
+        <tr><td style="text-align:left">17,84 m</td><td>1000 m²</td><td>10,0</td><td style="text-align:left">Popolamenti molto radi o disetanei con piante grosse</td></tr>
+      </table></div>
+      <p>Il <b>fattore a ettaro</b> è 10 000 diviso la superficie dell'area: dice quante piante per ettaro
+        rappresenta ciascun albero contato. Con raggio 13 m ogni albero vale 18,8 piante/ha — motivo per cui
+        sbagliare a includere un solo albero al confine sposta il risultato di quasi diciannove piante.</p>
+    </details>
+    <details><summary>Che cos'è la soglia di cavallettamento</summary>
+      <p>È il diametro minimo sotto il quale un fusto non si conta. Serve a non perdere mezz'ora dietro alla
+        rinnovazione, che pesa pochissimo in volume ma è numerosissima.</p>
+      <p>La convenzione dell'Inventario Nazionale è <b>7,5 cm</b>, e conviene adottarla perché rende i
+        risultati confrontabili con i dati ufficiali. Alcuni piani di assestamento usano 17,5 cm quando
+        interessa solo il legname da opera. <b>La soglia va dichiarata sempre</b> insieme al risultato:
+        una provvigione senza la sua soglia non è confrontabile con nessun'altra.</p>
+    </details>
+ In pendenza si corregge:
+      raggio&nbsp;reale = raggio&nbsp;/&nbsp;cos(pendenza). Il calcolatore è qui sotto nella scheda Tavole.</div>
+  </div>
+
+  <div class="card">
+    <h2>2 · Cavallettamento — aggiungi albero</h2>
+    <div class="grid g3">
+      <div><label for="specie">Specie</label><select id="specie"></select></div>
+      <div><label for="gruppo">Gruppo</label><input id="gruppo" type="text" value="Gr.1"></div>
+      <div><label for="d1">Diametro d1 (cm)</label>
+        <input id="d1" class="big-in" type="number" inputmode="decimal" step="0.5" placeholder="34,5"></div>
+      <div><label for="d2">Diametro d2 — incrociato (cm)</label>
+        <input id="d2" type="number" inputmode="decimal" step="0.5" placeholder="facoltativo"></div>
+      <div><label for="hm">Altezza misurata (m)</label>
+        <input id="hm" type="number" inputmode="decimal" step="0.5" placeholder="facoltativa"></div>
+      <div style="display:flex;align-items:flex-end"><button class="act" id="addTree">Aggiungi albero</button></div>
+    </div>
+    <details style="margin-top:10px"><summary>Perché la specie cambia il volume</summary>
+      <p>Ogni specie ha una <b>forma del fusto</b> diversa, e quindi una diversa equazione di volume. A
+        parità di diametro e altezza un larice e un abete rosso non contengono la stessa quantità di legno:
+        il larice è più rastremato, l'abete rosso più cilindrico.</p>
+      <p>L'app usa le equazioni ufficiali dell'Inventario Nazionale delle Foreste, una per specie. Se
+        sbagli specie il volume può cambiare del 5–10%: in un popolamento misto conviene registrare la
+        specie albero per albero anziché impostarne una sola per tutta l'area.</p>
+      <p class="muted">Il nome va scritto esattamente come compare nell'elenco: è la chiave con cui l'app
+        ritrova i coefficienti nella scheda Tavole.</p>
+    </details>
+    <div style="margin-top:10px" class="row">
+      <button class="ghost" id="undoTree">↩ Annulla ultimo</button>
+      <button class="ghost" id="expCub">⬇ Esporta CSV</button>
+      <button class="danger" id="clrCub">Svuota rilievo</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>3 · Curva ipsometrica &nbsp;h = a + b · ln(d)</h2>
+    <div class="tiles">
+      <div class="tile"><div class="k">a</div><div class="v" id="hypA">—</div></div>
+      <div class="tile"><div class="k">b</div><div class="v" id="hypB">—</div></div>
+      <div class="tile"><div class="k">R²</div><div class="v" id="hypR">—</div></div>
+      <div class="tile"><div class="k">Altezze misurate</div><div class="v" id="hypN">0</div><div class="u">n</div></div>
+    </div>
+    <div id="hypMsg" class="muted" style="margin-top:8px"></div>
+    <svg class="chart" id="chHyp" viewBox="0 0 640 300" role="img" aria-label="Curva ipsometrica"></svg>
+  </div>
+
+  <div class="card">
+    <h2>4 · Risultati del popolamento</h2>
+    <div class="tiles">
+      <div class="tile"><div class="k">Piante</div><div class="v" id="rN">—</div><div class="u">n/ha</div></div>
+      <div class="tile"><div class="k">Area basimetrica</div><div class="v" id="rG">—</div><div class="u">m²/ha</div></div>
+      <div class="tile"><div class="k">Provvigione</div><div class="v" id="rV">—</div><div class="u">m³/ha</div></div>
+      <div class="tile"><div class="k">Diam. medio d<sub>g</sub></div><div class="v" id="rDg">—</div><div class="u">cm</div></div>
+      <div class="tile"><div class="k">Altezza media</div><div class="v" id="rH">—</div><div class="u">m</div></div>
+      <div class="tile"><div class="k">Coeff. di forma</div><div class="v" id="rF">—</div><div class="u">V/(g·h)</div></div>
+    </div>
+    <h3>Distribuzione diametrica</h3>
+    <svg class="chart" id="chDiam" viewBox="0 0 640 300" role="img" aria-label="Distribuzione diametrica"></svg>
+    <h3>Ripartizione per specie</h3>
+    <div class="scroll"><table class="nums" id="tabSpecie"></table></div>
+  </div>
+
+  <div class="card">
+    <h2>5 · Alberi rilevati</h2>
+    <div class="scroll"><table class="nums" id="tabAlberi"></table></div>
+  </div>
+</section>
+
+<!-- ============ DENDRO ============ -->
+<section id="tab-den" hidden>
+  <div class="card">
+    <h2>1 · Carote</h2>
+    <div class="grid g3">
+      <div><label for="coreId">Sigla carota</label><input id="coreId" type="text" placeholder="AR-01"></div>
+      <div><label for="coreYear">Anno dell'anello più esterno</label>
+        <input id="coreYear" type="number" value="2026" step="1"></div>
+      <div style="display:flex;align-items:flex-end"><button class="act" id="addCore">Crea carota</button></div>
+    </div>
+    <div id="coreChips" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card">
+    <h2>2 · Inserimento larghezze (mm)</h2>
+    <div class="grid g2">
+      <div><label for="coreSel">Carota attiva</label><select id="coreSel"></select></div>
+      <div><label for="wIn">Larghezza anello — premi Invio per confermare</label>
+        <input id="wIn" class="big-in" type="number" inputmode="decimal" step="0.01" placeholder="2,35"></div>
+    </div>
+    <div class="note" id="nextYearMsg">Si procede <b>dalla corteccia verso il midollo</b>: il primo valore è l'anello più esterno.</div>
+    <div class="row">
+      <button class="ghost" id="undoW">↩ Annulla ultimo anello</button>
+      <button class="ghost" id="expDen">⬇ Esporta CSV</button>
+      <button class="danger" id="clrDen">Svuota carote</button>
+    </div>
+    <div id="wList" style="margin-top:10px"></div>
+  </div>
+
+
+  <div class="card">
+    <h2>Il carotaggio, passo per passo</h2>
+    <figure class="figbox"><svg class="fig" viewBox="0 0 460 300" role="img" aria-label="Sezione del fusto con succhiello inserito correttamente e scorrettamente" xmlns="http://www.w3.org/2000/svg"><defs><marker id="ak" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--text-primary)"/></marker><marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--series-2)"/></marker><marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--series-1)"/></marker><marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--brand)"/></marker></defs><circle cx="230" cy="150" r="92" fill="var(--surface-2)" stroke="var(--line-strong)" stroke-width="2"/><circle cx="230" cy="150" r="16" fill="none" stroke="var(--wood)" stroke-opacity=".3" stroke-width="1.2"/><circle cx="230" cy="150" r="26" fill="none" stroke="var(--wood)" stroke-opacity=".3" stroke-width="1.2"/><circle cx="230" cy="150" r="36" fill="none" stroke="var(--wood)" stroke-opacity=".3" stroke-width="1.2"/><circle cx="230" cy="150" r="46" fill="none" stroke="var(--wood)" stroke-opacity=".3" stroke-width="1.2"/><circle cx="230" cy="150" r="56" fill="none" stroke="var(--wood)" stroke-opacity=".3" stroke-width="1.2"/><circle cx="230" cy="150" r="66" fill="none" stroke="var(--wood)" stroke-opacity=".3" stroke-width="1.2"/><circle cx="230" cy="150" r="76" fill="none" stroke="var(--wood)" stroke-opacity=".3" stroke-width="1.2"/><circle cx="230" cy="150" r="89" fill="none" stroke="var(--wood)" stroke-width="7" stroke-opacity=".5"/><path d="M 164 214 A 92 92 0 0 0 296 214 L 276 195 A 62 62 0 0 1 184 195 Z" fill="var(--bad)" opacity=".18"/><circle cx="230" cy="150" r="5" fill="var(--text-primary)"/><text x="230.0" y="138.0" text-anchor="middle" font-size="10" fill="var(--text-primary)" font-weight="700">midollo</text><rect x="34" y="145" width="104" height="10" rx="3" fill="var(--brand)"/><rect x="138" y="147" width="92" height="6" rx="2" fill="var(--brand)" opacity=".55"/><circle cx="34" cy="150" r="13" fill="none" stroke="var(--brand)" stroke-width="3.5"/><text x="86.0" y="134.0" text-anchor="middle" font-size="15" fill="var(--brand)" font-weight="800">sì</text><line x1="426" y1="66" x2="282" y2="98" stroke="var(--bad)" stroke-width="9" stroke-opacity=".7" stroke-linecap="round"/><g stroke="var(--bad)" stroke-width="3" stroke-linecap="round"><line x1="392" y1="40" x2="408" y2="56"/><line x1="408" y1="40" x2="392" y2="56"/></g><text x="370.0" y="52.0" text-anchor="end" font-size="15" fill="var(--bad)" font-weight="800">no</text><text x="230.0" y="268.0" text-anchor="middle" font-size="10.5" fill="var(--bad)" font-weight="700">lato a valle</text><line x1="230.0" y1="276.0" x2="230.0" y2="258.0" stroke="var(--bad)" stroke-width="1.4" marker-end="url(#ak)"/><text x="230.0" y="292.0" text-anchor="middle" font-size="10" fill="var(--text-muted)" font-weight="600">vista dall'alto della sezione del fusto</text></svg><figcaption><b>Come si punta il succhiello.</b> Perpendicolare al fusto e diretto al midollo: solo così la carota attraversa tutti gli anelli. Una carota che passa di lato salta gli anelli più interni e fa sottostimare l'età. Il prelievo va fatto <b>lungo la curva di livello</b>: nel settore a valle di un fusto inclinato si forma legno di reazione, con anelli anomali che falsano la misura.</figcaption></figure>
+    
+      
+      <figure class="figbox"><svg class="fig" viewBox="0 0 460 250" role="img" aria-label="La carota estratta, dalla corteccia al midollo" xmlns="http://www.w3.org/2000/svg"><defs><marker id="ak" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--text-primary)"/></marker><marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--series-2)"/></marker><marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--series-1)"/></marker><marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--brand)"/></marker></defs><rect x="40" y="96" width="380" height="48" rx="4" fill="#e8d3ab" stroke="var(--line-strong)"/><rect x="40" y="96" width="14" height="48" rx="3" fill="var(--wood)"/><rect x="58.4" y="96" width="3.6" height="48" fill="var(--wood)" opacity=".8"/><rect x="68.4" y="96" width="3.6" height="48" fill="var(--wood)" opacity=".8"/><rect x="81.4" y="96" width="3.6" height="48" fill="var(--wood)" opacity=".8"/><rect x="97.4" y="96" width="3.6" height="48" fill="var(--wood)" opacity=".8"/><rect x="109.4" y="96" width="3.6" height="48" fill="var(--wood)" opacity=".8"/><rect x="127.4" y="96" width="3.6" height="48" fill="var(--wood)" opacity=".8"/><rect x="148.4" y="96" width="3.6" height="48" fill="var(--wood)" opacity=".8"/><rect x="163.4" y="96" width="3.6" height="48" fill="var(--wood)" opacity=".8"/><rect x="187.4" y="96" width="3.6" height="48" fill="var(--wood)" opacity=".8"/><rect x="215.4" y="96" width="3.6" height="48" fill="var(--wood)" opacity=".8"/><rect x="236.4" y="96" width="3.6" height="48" fill="var(--wood)" opacity=".8"/><rect x="268.4" y="96" width="3.6" height="48" fill="var(--wood)" opacity=".8"/><rect x="295.4" y="96" width="3.6" height="48" fill="var(--wood)" opacity=".8"/><rect x="331.4" y="96" width="3.6" height="48" fill="var(--wood)" opacity=".8"/><rect x="362.4" y="96" width="3.6" height="48" fill="var(--wood)" opacity=".8"/><rect x="402.4" y="96" width="3.6" height="48" fill="var(--wood)" opacity=".8"/><circle cx="410" cy="120" r="5.5" fill="var(--text-primary)"/><line x1="47.0" y1="82.0" x2="47.0" y2="94.0" stroke="var(--text-primary)" stroke-width="1.4" marker-end="url(#ak)"/><text x="47.0" y="76.0" text-anchor="start" font-size="10" fill="var(--text-primary)" font-weight="700">corteccia</text><line x1="410.0" y1="164.0" x2="410.0" y2="150.0" stroke="var(--text-primary)" stroke-width="1.4" marker-end="url(#ak)"/><text x="410.0" y="178.0" text-anchor="end" font-size="10" fill="var(--text-primary)" font-weight="700">midollo</text><line x1="80.0" y1="52.0" x2="380.0" y2="52.0" stroke="var(--series-2)" stroke-width="2" marker-end="url(#ao)"/><text x="230.0" y="42.0" text-anchor="middle" font-size="11" fill="var(--series-2)" font-weight="800">si legge dalla corteccia (2026) verso il midollo</text><text x="406.0" y="78.0" text-anchor="end" font-size="10" fill="var(--text-muted)" font-weight="700">anni più antichi</text><line x1="167.0" y1="144" x2="184" y2="178" stroke="var(--line-strong)" stroke-dasharray="3 3"/><line x1="191.0" y1="144" x2="276" y2="178" stroke="var(--line-strong)" stroke-dasharray="3 3"/><rect x="184" y="178" width="92" height="38" rx="4" fill="#e8d3ab" stroke="var(--line-strong)"/><rect x="248" y="178" width="28" height="38" fill="var(--wood)" opacity=".8"/><line x1="184" y1="168" x2="276" y2="168" stroke="var(--series-2)" stroke-width="1.6" marker-end="url(#ao)" marker-start="url(#ao)"/><text x="230.0" y="162.0" text-anchor="middle" font-size="10.5" fill="var(--series-2)" font-weight="800">un anello = un anno</text><text x="212.0" y="230.0" text-anchor="middle" font-size="9.5" fill="var(--text-muted)" font-weight="700">primaverile</text><text x="270.0" y="230.0" text-anchor="middle" font-size="9.5" fill="var(--text-muted)" font-weight="700">tardivo</text></svg><figcaption><b>Che cosa si legge sulla carota.</b> L'anello sotto la corteccia è quello dell'anno in corso: da lì si procede a ritroso. Ogni anello è una coppia di bande — il <b>legno primaverile</b>, chiaro, a cellule ampie e pareti sottili, e il <b>legno tardivo</b>, scuro e denso. Il limite che l'occhio riconosce è il salto brusco fra il tardivo di un anno e il primaverile dell'anno dopo. Gli anelli si stringono verso la corteccia per pura geometria: la stessa quantità di legno si distribuisce su una circonferenza sempre più lunga.</figcaption></figure>
+  </div>
+
+  <div class="card" id="foto">
+    <h2>Misura degli anelli da fotografia</h2>
+    <p class="muted">Fotografa la carota <b>accanto a un righello</b>, poi misura gli anelli toccando lo
+      schermo. Si arriva a 0,05–0,1 mm, contro i 0,5 mm scarsi che si ottengono a occhio nudo con un righello.</p>
+    <label for="fotoFile">Foto della carota</label>
+    <input id="fotoFile" type="file" accept="image/*" capture="environment">
+  
+    <div id="fotoWork" hidden>
+      <div class="fotowrap">
+        <canvas id="fotoCv"></canvas>
+        <canvas id="fotoLoupe" class="loupe" hidden></canvas>
+      </div>
+      <div class="row" style="margin-top:9px">
+        <button class="ghost" id="fzIn">＋</button>
+        <button class="ghost" id="fzOut">−</button>
+        <button class="ghost" id="fzFit">Adatta</button>
+        <button class="ghost" id="fUndo">↩ Annulla punto</button>
+      </div>
+  
+      <div class="steps" style="margin-top:13px">
+        <div class="step" id="fStep1">
+          <div class="step-n">1</div>
+          <div class="step-b"><b>Taratura sul righello</b>
+            <div class="muted">Tocca due tacche del righello, poi indica quanti millimetri le separano</div>
+            <div class="step-val" id="fCal">—</div></div>
+        </div>
+        <div class="step" id="fStep2">
+          <div class="step-n">2</div>
+          <div class="step-b"><b>Limiti degli anelli</b>
+            <div class="muted">Tocca in ordine ogni limite, dalla corteccia verso il midollo</div>
+            <div class="step-val" id="fCount">0 punti</div></div>
+        </div>
+      </div>
+  
+      <div class="grid g2" id="fCalBox" style="margin-top:10px">
+        <div><label for="fMm">Distanza fra le due tacche (mm)</label>
+          <input id="fMm" type="number" inputmode="decimal" step="0.5" value="10"></div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="act" id="fCalOk">Conferma taratura</button></div>
+      </div>
+  
+      <div id="fOut" hidden>
+        <div class="tiles" style="margin-top:11px">
+          <div class="tile"><div class="k">Scala</div><div class="v sm" id="fScale">—</div><div class="u">mm per pixel</div></div>
+          <div class="tile"><div class="k">Anelli misurati</div><div class="v" id="fN">0</div></div>
+          <div class="tile"><div class="k">Larghezza media</div><div class="v" id="fMean">—</div><div class="u">mm</div></div>
+        </div>
+        <div class="scroll" style="margin-top:10px"><table class="nums" id="fTab"></table></div>
+        <div class="row" style="margin-top:10px">
+          <button class="act" id="fSend">↑ Invia alla carota attiva</button>
+          <button class="ghost" id="fReset">↻ Ricomincia</button>
+        </div>
+        <div class="note">I valori sostituiscono le larghezze già inserite nella carota selezionata nella
+          scheda «Anelli». L'anno del primo limite è quello dell'anello più esterno della carota.</div>
+      </div>
+    </div>
+  
+  
+  <figure class="figbox"><svg class="fig" viewBox="0 0 460 230" role="img" aria-label="Misura degli anelli su fotografia: taratura e limiti" xmlns="http://www.w3.org/2000/svg"><defs><marker id="ak" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--text-primary)"/></marker><marker id="ao" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--series-2)"/></marker><marker id="ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--series-1)"/></marker><marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5.5" markerHeight="5.5" orient="auto-start-reverse"><path d="M0,1 L9,5 L0,9 z" fill="var(--brand)"/></marker></defs><rect x="30" y="34" width="400" height="32" rx="3" fill="var(--surface-2)" stroke="var(--line-strong)"/><line x1="44" y1="34" x2="44" y2="64" stroke="var(--text-primary)" stroke-width="1.8"/><line x1="71" y1="34" x2="71" y2="54" stroke="var(--text-primary)" stroke-width="1"/><line x1="98" y1="34" x2="98" y2="54" stroke="var(--text-primary)" stroke-width="1"/><line x1="125" y1="34" x2="125" y2="54" stroke="var(--text-primary)" stroke-width="1"/><line x1="152" y1="34" x2="152" y2="54" stroke="var(--text-primary)" stroke-width="1"/><line x1="179" y1="34" x2="179" y2="64" stroke="var(--text-primary)" stroke-width="1.8"/><line x1="206" y1="34" x2="206" y2="54" stroke="var(--text-primary)" stroke-width="1"/><line x1="233" y1="34" x2="233" y2="54" stroke="var(--text-primary)" stroke-width="1"/><line x1="260" y1="34" x2="260" y2="54" stroke="var(--text-primary)" stroke-width="1"/><line x1="287" y1="34" x2="287" y2="54" stroke="var(--text-primary)" stroke-width="1"/><line x1="314" y1="34" x2="314" y2="64" stroke="var(--text-primary)" stroke-width="1.8"/><line x1="341" y1="34" x2="341" y2="54" stroke="var(--text-primary)" stroke-width="1"/><line x1="368" y1="34" x2="368" y2="54" stroke="var(--text-primary)" stroke-width="1"/><line x1="395" y1="34" x2="395" y2="54" stroke="var(--text-primary)" stroke-width="1"/><line x1="422" y1="34" x2="422" y2="54" stroke="var(--text-primary)" stroke-width="1"/><line x1="44" y1="50" x2="179" y2="50" stroke="var(--series-2)" stroke-width="2.4"/><circle cx="44" cy="50" r="6.5" fill="var(--series-2)"/><circle cx="179" cy="50" r="6.5" fill="var(--series-2)"/><circle cx="30" cy="20" r="10" fill="var(--series-2)"/><text x="30.0" y="24.0" text-anchor="middle" font-size="12" fill="#fff" font-weight="800">1</text><text x="48.0" y="24.0" text-anchor="start" font-size="11" fill="var(--series-2)" font-weight="800">taratura sul righello</text><rect x="30" y="108" width="400" height="54" rx="4" fill="#e8d3ab" stroke="var(--line-strong)"/><rect x="50" y="108" width="5" height="54" fill="var(--wood)" opacity=".8"/><rect x="84" y="108" width="5" height="54" fill="var(--wood)" opacity=".8"/><line x1="52" y1="135" x2="86" y2="135" stroke="var(--series-1)" stroke-width="1.6"/><rect x="130" y="108" width="5" height="54" fill="var(--wood)" opacity=".8"/><line x1="86" y1="135" x2="132" y2="135" stroke="var(--series-1)" stroke-width="1.6"/><rect x="164" y="108" width="5" height="54" fill="var(--wood)" opacity=".8"/><line x1="132" y1="135" x2="166" y2="135" stroke="var(--series-1)" stroke-width="1.6"/><rect x="218" y="108" width="5" height="54" fill="var(--wood)" opacity=".8"/><line x1="166" y1="135" x2="220" y2="135" stroke="var(--series-1)" stroke-width="1.6"/><rect x="256" y="108" width="5" height="54" fill="var(--wood)" opacity=".8"/><line x1="220" y1="135" x2="258" y2="135" stroke="var(--series-1)" stroke-width="1.6"/><rect x="318" y="108" width="5" height="54" fill="var(--wood)" opacity=".8"/><line x1="258" y1="135" x2="320" y2="135" stroke="var(--series-1)" stroke-width="1.6"/><rect x="364" y="108" width="5" height="54" fill="var(--wood)" opacity=".8"/><line x1="320" y1="135" x2="366" y2="135" stroke="var(--series-1)" stroke-width="1.6"/><rect x="410" y="108" width="5" height="54" fill="var(--wood)" opacity=".8"/><line x1="366" y1="135" x2="412" y2="135" stroke="var(--series-1)" stroke-width="1.6"/><circle cx="52" cy="135" r="7.5" fill="var(--series-1)"/><text x="52.0" y="139.0" text-anchor="middle" font-size="9" fill="#fff" font-weight="800">1</text><circle cx="86" cy="135" r="7.5" fill="var(--series-1)"/><text x="86.0" y="139.0" text-anchor="middle" font-size="9" fill="#fff" font-weight="800">2</text><circle cx="132" cy="135" r="7.5" fill="var(--series-1)"/><text x="132.0" y="139.0" text-anchor="middle" font-size="9" fill="#fff" font-weight="800">3</text><circle cx="166" cy="135" r="7.5" fill="var(--series-1)"/><text x="166.0" y="139.0" text-anchor="middle" font-size="9" fill="#fff" font-weight="800">4</text><circle cx="220" cy="135" r="7.5" fill="var(--series-1)"/><text x="220.0" y="139.0" text-anchor="middle" font-size="9" fill="#fff" font-weight="800">5</text><circle cx="258" cy="135" r="7.5" fill="var(--series-1)"/><text x="258.0" y="139.0" text-anchor="middle" font-size="9" fill="#fff" font-weight="800">6</text><circle cx="320" cy="135" r="7.5" fill="var(--series-1)"/><text x="320.0" y="139.0" text-anchor="middle" font-size="9" fill="#fff" font-weight="800">7</text><circle cx="366" cy="135" r="7.5" fill="var(--series-1)"/><text x="366.0" y="139.0" text-anchor="middle" font-size="9" fill="#fff" font-weight="800">8</text><circle cx="412" cy="135" r="7.5" fill="var(--series-1)"/><text x="412.0" y="139.0" text-anchor="middle" font-size="9" fill="#fff" font-weight="800">9</text><circle cx="30" cy="92" r="10" fill="var(--series-1)"/><text x="30.0" y="96.0" text-anchor="middle" font-size="12" fill="#fff" font-weight="800">2</text><text x="48.0" y="96.0" text-anchor="start" font-size="11" fill="var(--series-1)" font-weight="800">limiti degli anelli, in ordine</text><text x="230.0" y="200.0" text-anchor="middle" font-size="10" fill="var(--text-muted)" font-weight="600">la lente d'ingrandimento segue il dito</text></svg><figcaption><b>Misurare gli anelli su una fotografia.</b> Prima si tocca <b>due tacche del righello</b> e si dichiara quanti millimetri le separano: da lì l'app ricava quanti millimetri vale un pixel. Poi si tocca in ordine ogni limite di anello, dalla corteccia verso il midollo. Una lente d'ingrandimento segue il dito per toccare con precisione. Il risultato si trasferisce con un pulsante nella carota attiva. Si arriva a 0,05–0,1 mm, contro i 0,5 mm scarsi del righello a occhio nudo.</figcaption></figure>
+
+    <details style="margin-top:11px"><summary>Come fotografare bene una carota</summary>
+      <ol class="proto">
+        <li>Carteggia e inumidisci la superficie: senza contrasto la fotocamera non vede gli anelli sottili.</li>
+        <li>Appoggia un <b>righello metallico</b> accanto alla carota, sullo stesso piano: se è più alto o più
+          basso, la scala risulta sbagliata per effetto della prospettiva.</li>
+        <li>Fotografa <b>dall'alto, perpendicolarmente</b>, con luce radente laterale: esalta il rilievo fra
+          legno primaverile e tardivo.</li>
+        <li>Non usare il flash frontale: appiattisce tutto. Meglio la luce di una finestra o una torcia tenuta di lato.</li>
+        <li>Riempi l'inquadratura con 3–4 cm di carota per volta. Per una carota lunga fai più foto,
+          sovrapponendole di qualche anello e misurandole una alla volta.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>3 · Standardizzazione (detrending)</h2>
+    <div class="grid g3">
+      <div><label for="detMethod">Metodo</label>
+        <select id="detMethod">
+          <option value="ma" selected>Media mobile centrata</option>
+          <option value="spline">Spline cubica (approssimata)</option>
+          <option value="lin">Retta di regressione</option>
+          <option value="negexp">Esponenziale negativa</option>
+          <option value="mean">Media della serie (solo scala)</option>
+        </select></div>
+      <div><label for="detWin">Finestra / rigidità (anni)</label>
+        <input id="detWin" type="number" value="31" min="5" step="2"></div>
+      <div><label for="detIdx">Indice</label>
+        <select id="detIdx">
+          <option value="ratio" selected>Rapporto  w / g</option>
+          <option value="diff">Differenza  w − g (residui)</option>
+        </select></div>
+    </div>
+    <details><summary>Quale metodo scegliere, e perché cambia il risultato</summary>
+      <p>Standardizzare vuol dire togliere da ogni serie la tendenza dovuta all'età, che non c'entra col
+        clima: è geometria, perché la stessa quantità di legno si distribuisce su una circonferenza sempre
+        più lunga. Si adatta alla serie una curva e si divide la larghezza osservata per il valore della
+        curva. Il risultato è un indice adimensionale che vale in media 1.</p>
+      <div class="scroll"><table>
+        <tr><th style="text-align:left">Metodo</th><th style="text-align:left">Quando conviene</th><th style="text-align:left">Che cosa perdi</th></tr>
+        <tr><td style="text-align:left"><b>Media mobile centrata</b><br><span class="muted">consigliato per la classe</span></td>
+          <td style="text-align:left">Sempre. È l'approssimazione didattica della spline: si calcola anche a mano o in un foglio elettronico, e si capisce guardandola.</td>
+          <td style="text-align:left">Le variazioni più lente della finestra scelta. Con 31 anni resta tutta la variabilità da un anno all'altro, che è quella che correliamo col clima.</td></tr>
+        <tr><td style="text-align:left"><b>Spline cubica</b><br><span class="muted">approssimata</span></td>
+          <td style="text-align:left">È lo standard della disciplina. Segue anche le tendenze non monotone lasciate dai diradamenti.</td>
+          <td style="text-align:left">Come sopra, ma con un raccordo più morbido. Qui è ottenuta con tre passaggi di media mobile.</td></tr>
+        <tr><td style="text-align:left"><b>Esponenziale negativa</b></td>
+          <td style="text-align:left">Piante cresciute in bosco chiuso senza disturbi, con il classico decadimento giovanile. È la curva storica di Fritts.</td>
+          <td style="text-align:left">Nulla alle basse frequenze: conserva i trend secolari. Ma se la serie non ha quella forma non converge, e l'app ripiega sulla retta.</td></tr>
+        <tr><td style="text-align:left"><b>Retta di regressione</b></td>
+          <td style="text-align:left">Quando l'esponenziale non converge, o quando la carota comincia già in fase adulta.</td>
+          <td style="text-align:left">Nulla alle basse frequenze, ma descrive male la curvatura reale dei primi decenni.</td></tr>
+        <tr><td style="text-align:left"><b>Media della serie</b></td>
+          <td style="text-align:left">Solo per confronto: divide per un numero, non toglie nessuna tendenza.</td>
+          <td style="text-align:left">Niente — ma non standardizza. Serve a far vedere alla classe che cosa succede se non si standardizza affatto.</td></tr>
+      </table></div>
+      <p><b>Prova a cambiarlo.</b> Se le correlazioni col clima restano simili passando da un metodo
+        all'altro, il segnale è robusto. Se cambiano molto, il risultato dipende più dalla scelta di chi
+        analizza che dall'albero: è una verifica di metodo che vale una lezione.</p>
+    </details>
+    <details><summary>Finestra, e che cosa succede se la stringi troppo</summary>
+      <p>È l'ampiezza in anni della media mobile, cioè quanto la curva è libera di seguire la serie.
+        <b>Più è corta, più la curva insegue i dati</b> e più segnale se ne va.</p>
+      <p>Con <b>31 anni</b> si toglie la tendenza di età e si trattiene bene la variabilità anno per anno.
+        Con 5 anni la curva ripassa quasi sopra ogni punto, tutti gli indici tendono a 1 e ogni correlazione
+        col clima svanisce: <b>provalo di proposito</b>, è il modo più efficace per far capire che cosa fa
+        davvero la standardizzazione.</p>
+      <p class="muted">Regola della disciplina: rigidità pari a due terzi della lunghezza della serie.
+        Su 90 anelli sarebbero 60 anni; 31 è una scelta più conservativa, che privilegia il segnale
+        interannuale.</p>
+    </details>
+    <details><summary>Rapporto o differenza?</summary>
+      <p><b>Rapporto</b> — l'indice è la larghezza divisa per la curva. È la scelta normale, perché nelle
+        serie di anelli la variabilità cresce insieme alla larghezza: da giovane l'albero oscilla di
+        millimetri, da vecchio di decimi, ma in percentuale allo stesso modo. Dividere stabilizza la
+        varianza lungo tutta la serie e rende confrontabili alberi giovani e vecchi.</p>
+      <p><b>Differenza</b> — l'indice è lo scarto dalla curva. Ha senso solo su serie già molto uniformi,
+        o quando compaiono anelli quasi nulli che nel rapporto darebbero valori estremi. In un lavoro
+        didattico si usa per confronto, non come scelta principale.</p>
+    </details>
+    <div class="tiles" style="margin-top:12px">
+      <div class="tile"><div class="k">Serie</div><div class="v" id="sN">0</div></div>
+      <div class="tile"><div class="k">Anni coperti</div><div class="v" id="sY">—</div></div>
+      <div class="tile"><div class="k">Larghezza media</div><div class="v" id="sW">—</div><div class="u">mm</div></div>
+      <div class="tile"><div class="k">Sensibilità media</div><div class="v" id="sMS">—</div></div>
+      <div class="tile"><div class="k">r&#772; fra serie</div><div class="v" id="sRb">—</div></div>
+      <div class="tile"><div class="k">EPS</div><div class="v" id="sEPS">—</div></div>
+    </div>
+    <div id="epsMsg" class="muted" style="margin-top:8px"></div>
+    <h3>Serie grezze e curve di detrending</h3>
+    <div class="legend"><span><i class="sw" style="background:var(--series-1)"></i>larghezza osservata</span>
+      <span><i class="sw" style="background:var(--series-2)"></i>curva di detrending</span></div>
+    <svg class="chart" id="chRaw" viewBox="0 0 640 300" role="img" aria-label="Larghezze e curve di detrending"></svg>
+    <h3>Cronologia standardizzata (RWI)</h3>
+    <svg class="chart" id="chRwi" viewBox="0 0 640 300" role="img" aria-label="Cronologia RWI"></svg>
+  </div>
+
+  <div class="card">
+    <h2>4 · Risposta al clima</h2>
+    <div class="grid g3">
+      <div><label for="yStart">Anno iniziale</label><input id="yStart" type="number" value="1950"></div>
+      <div><label for="yEnd">Anno finale</label><input id="yEnd" type="number" value="2025"></div>
+      <div><label for="pCorr">Correzione P (×)</label><input id="pCorr" type="number" value="0.584" step="0.001"></div>
+    </div>
+    <div class="warnbox">Serie climatiche: rianalisi <b>ERA5-Land</b> (Copernicus) sulla cella di Domegge, quota di
+      riferimento 780 m, 1950–2025. Ottime per la variabilità interannuale; la precipitazione è sovrastimata
+      rispetto ai pluviometri ARPAV, da cui il coefficiente di correzione. Un fattore moltiplicativo
+      <b>non cambia</b> i coefficienti di correlazione.</div>
+    <details><summary>Finestra di analisi e correzione della precipitazione</summary>
+      <p><b>Anno iniziale e finale.</b> Delimitano il periodo su cui si calcolano le correlazioni. Più anni
+        significa più potenza statistica: con 76 anni basta un coefficiente di 0,23 per essere significativo
+        al 5%, con 35 anni ne serve 0,33. Restringere la finestra ha però un uso preciso: <b>dividi il
+        periodo in due metà e confronta</b>. Se le correlazioni cambiano molto, la relazione fra crescita
+        e clima non è stabile nel tempo — è il problema della <i>divergenza</i>, discusso in letteratura.</p>
+      <p><b>Correzione P.</b> Le precipitazioni provengono da una rianalisi che nelle valli alpine strette
+        sovrastima parecchio: circa 1900 mm all'anno contro i 1100 misurati dai pluviometri ARPAV della
+        zona. Il coefficiente 0,584 riporta i valori alla scala reale.</p>
+      <p>La cosa importante da capire: essendo un <b>fattore moltiplicativo costante, non cambia di una
+        virgola i coefficienti di correlazione</b>. Serve solo perché i millimetri scritti nella relazione
+        siano credibili. Puoi verificarlo: metti 1 al posto di 0,584 e guarda la tabella delle
+        correlazioni — non si muove.</p>
+    </details>
+    <h3>Correlazioni ordinate per intensità</h3>
+    <svg class="chart" id="chCorr" viewBox="0 0 640 560" role="img" aria-label="Correlazioni con il clima"></svg>
+    <div class="scroll"><table class="nums" id="tabCorr"></table></div>
+    <h3>Diagramma di dispersione</h3>
+    <div class="grid g2">
+      <div><label for="varSel">Variabile climatica</label><select id="varSel"></select></div>
+      <div class="tiles"><div class="tile"><div class="k">r</div><div class="v" id="scR">—</div></div>
+        <div class="tile"><div class="k">R²</div><div class="v" id="scR2">—</div></div></div>
+    </div>
+    <svg class="chart" id="chScat" viewBox="0 0 640 340" role="img" aria-label="Dispersione RWI vs clima"></svg>
+    <div id="scEq" class="eqn"></div>
+  </div>
+</section>

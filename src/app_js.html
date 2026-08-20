@@ -1,0 +1,227 @@
+<script>
+"use strict";
+/* ============================================================
+   CuboDendro — applicazione di campo per cubatura forestale
+   e dendrocronologia. Tutto in un unico file, funziona offline.
+   ============================================================ */
+
+/* ---------- 1. Equazioni di volume (Tabacchi et al. 2011, INFC) ----------
+   v [dm3] = b1 + b2*d^2*h + b3*d     con d in cm, h in m               */
+const SPECIE = [
+  {n:"Abete rosso",   s:"Picea abies",         b1:-9.1298,  b2:3.4866e-2, b3:1.4633},
+  {n:"Abete bianco",  s:"Abies alba",          b1:-1.8381,  b2:3.7836e-2, b3:3.9934e-1},
+  {n:"Larice",        s:"Larix decidua",       b1:-16.519,  b2:2.9979e-2, b3:3.1506},
+  {n:"Pino cembro",   s:"Pinus cembra",        b1:2.8521,   b2:3.9504e-2, b3:0},
+  {n:"Pino silvestre",s:"Pinus sylvestris",    b1:3.1803,   b2:3.9899e-2, b3:0},
+  {n:"Faggio",        s:"Fagus sylvatica",     b1:0.81151,  b2:3.8965e-2, b3:0},
+  {n:"Acero di monte",s:"Acer pseudoplatanus", b1:1.6905,   b2:3.7082e-2, b3:0}
+];
+const spByName = {}; SPECIE.forEach(function(x){ spByName[x.n]=x; });
+function volume(nome, d, h){
+  const c = spByName[nome] || SPECIE[0];
+  if(!(d>0) || !(h>0)) return 0;
+  return Math.max(0,(c.b1 + c.b2*d*d*h + c.b3*d)/1000); // m3
+}
+function basimetrica(d){ return Math.PI*Math.pow(d/200,2); } // m2
+
+/* ---------- 2. Stato ---------- */
+const S = { trees:[], cores:[], active:null };
+const $ = function(id){ return document.getElementById(id); };
+function num(v){ const x=parseFloat(String(v).replace(",",".")); return isFinite(x)?x:NaN; }
+function fmt(x,d){ if(x===null||x===undefined||!isFinite(x)) return "—";
+  return x.toLocaleString("it-IT",{minimumFractionDigits:d,maximumFractionDigits:d}); }
+
+/* ---------- 3. Navigazione e tema ---------- */
+const SCHEDE = ['home','cub','ips','are','den','tav','dat','pro'];
+function apriScheda(t){
+  document.querySelectorAll('nav button').forEach(function(x){
+    x.setAttribute('aria-selected', x.dataset.tab===t ? 'true':'false'); });
+  SCHEDE.forEach(function(k){ const el=document.getElementById('tab-'+k); if(el) el.hidden = (k!==t); });
+  window.scrollTo(0,0); redrawAll();
+}
+document.querySelectorAll('nav button').forEach(function(b){
+  b.addEventListener('click',function(){ apriScheda(b.dataset.tab); });
+});
+document.getElementById('btnHelp').addEventListener('click',function(){ apriScheda('pro'); });
+document.getElementById('themeBtn').addEventListener('click',function(){
+  const cur=document.documentElement.getAttribute('data-theme');
+  document.documentElement.setAttribute('data-theme', cur==='dark'?'light':'dark');
+  redrawAll();
+});
+function cssv(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+/* ---------- 4. Popolamento dei menu specie ---------- */
+["specie","tvSp","dtSp"].forEach(function(id){
+  const sel=$(id);
+  SPECIE.forEach(function(x,i){ const o=document.createElement('option');
+    o.value=x.n; o.textContent=x.n; if(i===0)o.selected=true; sel.appendChild(o); });
+});
+
+/* ============================================================
+   PARTE A — CUBATURA
+   ============================================================ */
+function supAdS(){ const r=num($('raggio').value); return Math.PI*r*r; }
+function fattore(){ return 10000/supAdS(); }
+
+/* regressione lineare semplice: ritorna {a,b,r2,n} per y = a + b x */
+function linfit(xs, ys){
+  const n=xs.length; if(n<2) return null;
+  let sx=0,sy=0,sxx=0,sxy=0,syy=0;
+  for(let i=0;i<n;i++){ sx+=xs[i]; sy+=ys[i]; sxx+=xs[i]*xs[i]; sxy+=xs[i]*ys[i]; syy+=ys[i]*ys[i]; }
+  const den=n*sxx-sx*sx; if(Math.abs(den)<1e-12) return null;
+  const b=(n*sxy-sx*sy)/den, a=(sy-b*sx)/n;
+  const num_=n*sxy-sx*sy, r=num_/Math.sqrt(den*(n*syy-sy*sy));
+  return {a:a,b:b,r2:isFinite(r)?r*r:0,r:isFinite(r)?r:0,n:n};
+}
+function curvaIpso(){
+  const xs=[],ys=[];
+  S.trees.forEach(function(t){ if(t.h>0 && t.d>0){ xs.push(Math.log(t.d)); ys.push(t.h); } });
+  const f=linfit(xs,ys);
+  return f && xs.length>=3 ? f : null;
+}
+function altezza(t, ip){
+  if(t.h>0) return t.h;
+  if(ip){ const h=ip.a+ip.b*Math.log(t.d); return h>1.3?h:NaN; }
+  return NaN;
+}
+function addTree(){
+  const d1=num($('d1').value), d2=num($('d2').value), h=num($('hm').value);
+  if(!(d1>0)){ $('d1').focus(); return; }
+  const d = isFinite(d2)&&d2>0 ? (d1+d2)/2 : d1;
+  const soglia=num($('soglia').value);
+  if(d < soglia){ if(!confirm("Diametro "+fmt(d,1)+" cm sotto la soglia di "+fmt(soglia,1)+" cm. Inserire lo stesso?")) return; }
+  S.trees.push({ads:$('adsName').value.trim()||"AdS 1", gr:$('gruppo').value.trim()||"—",
+    sp:$('specie').value, d1:d1, d2:isFinite(d2)?d2:null, d:d, h:isFinite(h)&&h>0?h:null});
+  $('d1').value=""; $('d2').value=""; $('hm').value=""; $('d1').focus();
+  redrawCub();
+}
+$('addTree').addEventListener('click',addTree);
+['d1','d2','hm'].forEach(function(id){ $(id).addEventListener('keydown',function(e){ if(e.key==='Enter'){e.preventDefault();addTree();} }); });
+$('undoTree').addEventListener('click',function(){ S.trees.pop(); redrawCub(); });
+$('clrCub').addEventListener('click',function(){ if(confirm("Cancellare tutti gli alberi rilevati?")){ S.trees=[]; redrawCub(); } });
+['raggio','soglia','adsName'].forEach(function(id){ $(id).addEventListener('change',redrawCub); });
+
+const CLASSI = [];
+for(let lo=7.5; lo<=87.5; lo+=5) CLASSI.push({lo:lo, hi:lo+5, c:lo+2.5});
+
+function redrawCub(){
+  const F=fattore();
+  $('tSup').textContent=fmt(supAdS(),0);
+  $('tFatt').textContent=fmt(F,1);
+  $('tN').textContent=S.trees.length;
+
+  const ip=curvaIpso();
+  const nH=S.trees.filter(function(t){return t.h>0;}).length;
+  $('hypN').textContent=nH;
+  $('hypA').textContent = ip?fmt(ip.a,2):"—";
+  $('hypB').textContent = ip?fmt(ip.b,2):"—";
+  $('hypR').textContent = ip?fmt(ip.r2,3):"—";
+  $('hypMsg').textContent = ip ? "Curva stimata su "+nH+" altezze misurate. Le altezze mancanti vengono calcolate da questa curva."
+    : "Servono almeno 3 altezze misurate su alberi di diametro diverso per costruire la curva.";
+
+  let G=0,V=0,Gh=0,n=0,sumH=0,nH2=0;
+  const perSp={}, hist=CLASSI.map(function(){return 0;});
+  S.trees.forEach(function(t){
+    const h=altezza(t,ip), g=basimetrica(t.d);
+    const v=isFinite(h)?volume(t.sp,t.d,h):0;
+    G+=g; V+=v; n++;
+    if(isFinite(h)){ sumH+=h; nH2++; Gh+=g*h; }
+    if(!perSp[t.sp]) perSp[t.sp]={n:0,g:0,v:0};
+    perSp[t.sp].n++; perSp[t.sp].g+=g; perSp[t.sp].v+=v;
+    for(let i=0;i<CLASSI.length;i++) if(t.d>=CLASSI[i].lo && t.d<CLASSI[i].hi){ hist[i]++; break; }
+  });
+  const dg = n>0 ? Math.sqrt(G/n/Math.PI)*200 : NaN;
+  $('rN').textContent = n?fmt(n*F,0):"—";
+  $('rG').textContent = n?fmt(G*F,1):"—";
+  $('rV').textContent = V>0?fmt(V*F,0):"—";
+  $('rDg').textContent = n?fmt(dg,1):"—";
+  $('rH').textContent = nH2?fmt(sumH/nH2,1):"—";
+  $('rF').textContent = Gh>0?fmt(V/Gh,3):"—";
+
+  /* tabella specie */
+  let th='<tr><th style="text-align:left">Specie</th><th>n</th><th>N/ha</th><th>G/ha (m²)</th><th>V/ha (m³)</th><th>% vol.</th></tr>';
+  Object.keys(perSp).sort(function(a,b){return perSp[b].v-perSp[a].v;}).forEach(function(k){
+    const p=perSp[k];
+    th+='<tr><td style="text-align:left">'+k+'</td><td>'+p.n+'</td><td>'+fmt(p.n*F,0)+'</td><td>'+fmt(p.g*F,1)+
+        '</td><td>'+fmt(p.v*F,0)+'</td><td>'+(V>0?fmt(100*p.v/V,1)+"%":"—")+'</td></tr>';
+  });
+  $('tabSpecie').innerHTML = n?th:'<tr><td class="muted">Nessun albero inserito.</td></tr>';
+
+  /* tabella alberi */
+  let ta='<tr><th>#</th><th style="text-align:left">AdS</th><th style="text-align:left">Gruppo</th><th style="text-align:left">Specie</th><th>d (cm)</th><th>h (m)</th><th>g (m²)</th><th>V (m³)</th></tr>';
+  S.trees.slice().reverse().forEach(function(t,i){
+    const idx=S.trees.length-i, h=altezza(t,ip);
+    ta+='<tr><td>'+idx+'</td><td style="text-align:left">'+t.ads+'</td><td style="text-align:left">'+t.gr+
+        '</td><td style="text-align:left">'+t.sp+'</td><td>'+fmt(t.d,1)+'</td><td>'+(isFinite(h)?fmt(h,1)+(t.h?"":" *"):"—")+
+        '</td><td>'+fmt(basimetrica(t.d),4)+'</td><td>'+(isFinite(h)?fmt(volume(t.sp,t.d,h),3):"—")+'</td></tr>';
+  });
+  $('tabAlberi').innerHTML = n?ta+'<tr><td colspan="8" class="muted" style="text-align:left">* altezza stimata dalla curva ipsometrica</td></tr>'
+    :'<tr><td class="muted">Nessun albero inserito.</td></tr>';
+
+  drawHist(hist,F); drawHyp(ip);
+}
+
+/* ---------- grafici cubatura ---------- */
+function svgWrap(id,W,H){ const s=$(id); s.setAttribute('viewBox','0 0 '+W+' '+H); s.innerHTML=''; return s; }
+function el(tag,attrs,txt){ const e=document.createElementNS('http://www.w3.org/2000/svg',tag);
+  for(const k in attrs) e.setAttribute(k,attrs[k]); if(txt!==undefined) e.textContent=txt; return e; }
+function axisText(x,y,t,anchor,size){ return el('text',{x:x,y:y,'text-anchor':anchor||'middle',
+  'font-size':size||11,fill:cssv('--text-secondary'),'font-family':'inherit'},t); }
+
+function drawHist(hist,F){
+  const W=640,H=300,ml=48,mr=12,mt=14,mb=46;
+  const s=svgWrap('chDiam',W,H);
+  const last = hist.reduce(function(a,v,i){return v>0?i:a;},0);
+  const first = hist.reduce(function(a,v,i){return (v>0&&a<0)?i:a;},-1);
+  if(last===0 && hist[0]===0){ s.appendChild(axisText(W/2,H/2,'Nessun dato',undefined,13)); return; }
+  const i0=Math.max(0,(first<0?0:first)-1), i1=Math.min(hist.length-1,last+1);
+  const cls=hist.slice(i0,i1+1), labs=CLASSI.slice(i0,i1+1);
+  const mx=Math.max.apply(null,cls.map(function(v){return v*F;}))||1;
+  const tick=niceStep(mx), top=Math.ceil(mx/tick)*tick;
+  const pw=(W-ml-mr)/cls.length;
+  for(let v=0; v<=top+1e-9; v+=tick){
+    const y=H-mb-(v/top)*(H-mb-mt);
+    s.appendChild(el('line',{x1:ml,y1:y,x2:W-mr,y2:y,stroke:cssv('--line'),'stroke-width':1}));
+    s.appendChild(axisText(ml-7,y+4,fmt(v,0),'end'));
+  }
+  cls.forEach(function(c,i){
+    const v=c*F, h=(v/top)*(H-mb-mt), x=ml+i*pw+2, w=Math.max(2,pw-4);
+    if(v>0){ s.appendChild(el('rect',{x:x,y:H-mb-h,width:w,height:h,fill:cssv('--series-1'),rx:4,ry:4}));
+      s.appendChild(el('title',{},labs[i].c+" cm — "+fmt(v,0)+" piante/ha ("+c+" rilevate)")); }
+    if(i%2===0||cls.length<12) s.appendChild(axisText(ml+i*pw+pw/2,H-mb+16,String(labs[i].c)));
+  });
+  s.appendChild(el('line',{x1:ml,y1:H-mb,x2:W-mr,y2:H-mb,stroke:cssv('--line-strong'),'stroke-width':1}));
+  s.appendChild(axisText((W+ml)/2,H-8,'classe diametrica — centro classe (cm)'));
+  s.appendChild(el('text',{x:14,y:mt+4,'font-size':11,fill:cssv('--text-secondary'),transform:'rotate(-90 14 '+(mt+4)+')','text-anchor':'end'},'piante per ettaro'));
+}
+function niceStep(mx){ const raw=mx/5, p=Math.pow(10,Math.floor(Math.log10(raw))), n=raw/p;
+  return (n<=1?1:n<=2?2:n<=5?5:10)*p; }
+
+function drawHyp(ip){
+  const W=640,H=300,ml=48,mr=14,mt=14,mb=46;
+  const s=svgWrap('chHyp',W,H);
+  const pts=S.trees.filter(function(t){return t.h>0;});
+  if(pts.length===0 && !ip){ s.appendChild(axisText(W/2,H/2,'Misura qualche altezza per vedere la curva',undefined,13)); return; }
+  const ds=S.trees.map(function(t){return t.d;});
+  const dmin=Math.max(5,Math.floor(Math.min.apply(null,ds)/5)*5-5), dmax=Math.ceil(Math.max.apply(null,ds)/5)*5+5;
+  const hs=pts.map(function(t){return t.h;});
+  let hmax=Math.max.apply(null,hs.concat(ip?[ip.a+ip.b*Math.log(dmax)]:[]));
+  hmax=Math.ceil((hmax+2)/5)*5; const hmin=0;
+  const X=function(d){ return ml+(d-dmin)/(dmax-dmin)*(W-ml-mr); };
+  const Y=function(h){ return H-mb-(h-hmin)/(hmax-hmin)*(H-mb-mt); };
+  for(let h=0;h<=hmax;h+=5){ s.appendChild(el('line',{x1:ml,y1:Y(h),x2:W-mr,y2:Y(h),stroke:cssv('--line')}));
+    s.appendChild(axisText(ml-7,Y(h)+4,String(h),'end')); }
+  for(let d=dmin;d<=dmax;d+=10){ s.appendChild(axisText(X(d),H-mb+16,String(d))); }
+  if(ip){ let path='';
+    for(let d=Math.max(dmin,4); d<=dmax; d+=1){ const h=ip.a+ip.b*Math.log(d);
+      path+=(path?'L':'M')+X(d).toFixed(1)+' '+Y(Math.max(0,h)).toFixed(1); }
+    s.appendChild(el('path',{d:path,fill:'none',stroke:cssv('--series-2'),'stroke-width':2.5,'stroke-linecap':'round'}));
+  }
+  pts.forEach(function(t){
+    s.appendChild(el('circle',{cx:X(t.d),cy:Y(t.h),r:5,fill:cssv('--series-1'),stroke:cssv('--surface-1'),'stroke-width':2}));
+  });
+  s.appendChild(el('line',{x1:ml,y1:H-mb,x2:W-mr,y2:H-mb,stroke:cssv('--line-strong')}));
+  s.appendChild(axisText((W+ml)/2,H-8,'diametro a 1,30 m (cm)'));
+  s.appendChild(el('text',{x:14,y:mt+4,'font-size':11,fill:cssv('--text-secondary'),transform:'rotate(-90 14 '+(mt+4)+')','text-anchor':'end'},'altezza (m)'));
+}
+</script>
