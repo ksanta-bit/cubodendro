@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>CuboDendro — cubatura e dendrocronologia forestale</title>
+<title>DendroCubo — cubatura e dendrocronologia forestale</title>
 <meta name="description" content="Applicazione di campo per la cubatura del soprassuolo, l'ipsometria con inclinometro e la dendrocronologia. I.I.S. «8 Marzo – K. Lorenz», Mirano (VE).">
 <meta name="author" content="Gianluca Simonetti">
 <meta name="theme-color" content="#153b2e">
@@ -11,14 +11,14 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CuboDendro">
+<meta name="apple-mobile-web-app-title" content="DendroCubo">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <style>
 /* ============================================================
-   CuboDendro — foglio di stile
+   DendroCubo — foglio di stile
    Palette forestale: verde bosco, ambra, crema, legno.
    ============================================================ */
 :root{
@@ -290,6 +290,20 @@ details[open] summary{margin-bottom:9px}
 .testres.bad{border-color:var(--bad);background:var(--bad-soft)}
 .testres-h{font-size:16px;font-weight:800;margin-bottom:2px}
 
+/* ---------- registro dei rilievi ---------- */
+.regbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  background:var(--brand-soft);border:1px solid color-mix(in srgb,var(--brand) 20%,transparent);
+  border-radius:var(--r-sm);padding:12px 14px}
+.regbar-t{flex:1;min-width:0}
+.regbar-t .k{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--text-muted);font-weight:800}
+.regbar-t .v{display:block;font-size:19px;font-weight:800;letter-spacing:-.02em;line-height:1.2;
+  overflow-wrap:break-word}
+.regbar-t .regsub{display:block;font-size:11.5px;color:var(--text-secondary);margin-top:2px}
+.regsave{flex:0 0 auto;font-size:11.5px;font-weight:800;color:var(--text-muted);
+  font-variant-numeric:tabular-nums}
+.regsave.ok{color:var(--good)} .regsave.ko{color:var(--bad)}
+
 /* ---------- figure esplicative ---------- */
 .figbox{margin:12px 0;padding:0}
 svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
@@ -462,10 +476,10 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
 </style>
 </head>
 <body>
-<div id="splash" role="status" aria-label="Avvio di CuboDendro">
+<div id="splash" role="status" aria-label="Avvio di DendroCubo">
   <div class="sp-in">
     <div class="sp-logo"><svg viewBox="0 0 100 104" xmlns="http://www.w3.org/2000/svg" fill="currentColor" fill-rule="evenodd" aria-hidden="true"><path d="M 0.00 104.00 L 100.00 104.00 L 100.00 0.00 L 0.00 16.00 Z M 5.20 19.90 L 94.80 7.02 L 94.80 98.80 L 5.20 98.80 Z"/><path d="M 15.00 52.00 L 45.00 52.00 L 45.00 39.25 L 41.17 37.00 L 45.00 34.75 L 45.00 22.00 L 15.00 22.00 L 15.00 34.75 L 18.82 37.00 L 15.00 39.25 Z M 21.00 28.00 L 39.00 28.00 L 39.00 33.70 L 21.00 33.70 Z M 21.00 40.30 L 39.00 40.30 L 39.00 46.00 L 21.00 46.00 Z"/><path d="M 55.00 52.00 L 61.00 52.00 L 61.00 22.00 L 55.00 22.00 Z"/><path d="M 79.00 52.00 L 85.00 52.00 L 85.00 22.00 L 79.00 22.00 Z"/><path d="M 55.00 28.00 L 85.00 28.00 L 85.00 22.00 L 55.00 22.00 Z"/><path d="M 67.00 39.40 L 73.00 39.40 L 73.00 22.00 L 67.00 22.00 Z"/><path d="M 15.00 92.00 L 21.00 92.00 L 21.00 62.00 L 15.00 62.00 Z"/><path d="M 35.71 62.00 L 23.28 77.00 L 35.71 92.00 L 43.50 92.00 L 31.07 77.00 L 43.50 62.00 Z"/><path d="M 55.00 86.00 L 61.00 86.00 L 61.00 62.00 L 55.00 62.00 Z"/><path d="M 55.00 92.00 L 85.00 92.00 L 85.00 86.00 L 55.00 86.00 Z"/></svg></div>
-    <div class="sp-name">CuboDendro</div>
+    <div class="sp-name">DendroCubo</div>
     <div class="sp-sub">Cubatura &middot; Ipsometria &middot; Dendrocronologia</div>
     <div class="sp-sch">Istituto di Istruzione Superiore<br>&laquo;8 Marzo &ndash; K. Lorenz&raquo; &middot; Mirano (VE)<br>Istituto Tecnico Agrario</div>
     <div class="sp-aut">prof. Gianluca Simonetti</div>
@@ -478,7 +492,7 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
   <div class="htop">
     <span class="logo"><svg viewBox="0 0 100 104" xmlns="http://www.w3.org/2000/svg" fill="currentColor" fill-rule="evenodd" aria-hidden="true"><path d="M 0.00 104.00 L 100.00 104.00 L 100.00 0.00 L 0.00 16.00 Z M 5.20 19.90 L 94.80 7.02 L 94.80 98.80 L 5.20 98.80 Z"/><path d="M 15.00 52.00 L 45.00 52.00 L 45.00 39.25 L 41.17 37.00 L 45.00 34.75 L 45.00 22.00 L 15.00 22.00 L 15.00 34.75 L 18.82 37.00 L 15.00 39.25 Z M 21.00 28.00 L 39.00 28.00 L 39.00 33.70 L 21.00 33.70 Z M 21.00 40.30 L 39.00 40.30 L 39.00 46.00 L 21.00 46.00 Z"/><path d="M 55.00 52.00 L 61.00 52.00 L 61.00 22.00 L 55.00 22.00 Z"/><path d="M 79.00 52.00 L 85.00 52.00 L 85.00 22.00 L 79.00 22.00 Z"/><path d="M 55.00 28.00 L 85.00 28.00 L 85.00 22.00 L 55.00 22.00 Z"/><path d="M 67.00 39.40 L 73.00 39.40 L 73.00 22.00 L 67.00 22.00 Z"/><path d="M 15.00 92.00 L 21.00 92.00 L 21.00 62.00 L 15.00 62.00 Z"/><path d="M 35.71 62.00 L 23.28 77.00 L 35.71 92.00 L 43.50 92.00 L 31.07 77.00 L 43.50 62.00 Z"/><path d="M 55.00 86.00 L 61.00 86.00 L 61.00 62.00 L 55.00 62.00 Z"/><path d="M 55.00 92.00 L 85.00 92.00 L 85.00 86.00 L 55.00 86.00 Z"/></svg></span>
     <div class="htxt">
-      <h1>CuboDendro</h1>
+      <h1>DendroCubo</h1>
       <span class="sub">Cubatura · ipsometria · dendrocronologia</span>
       <span class="sch">Istituto di Istruzione Superiore «8 Marzo &ndash; K. Lorenz» &middot; Mirano (VE)</span>
     </div>
@@ -521,7 +535,7 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
   <div class="hero">
 <svg class="scene" viewBox="0 0 400 214" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Il simbolo dell'Istituto in un bosco stilizzato"><defs><linearGradient id="hgGround" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--brand)" stop-opacity=".16"/><stop offset="1" stop-color="var(--brand)" stop-opacity=".03"/></linearGradient><radialGradient id="hgGlow" cx=".5" cy=".55" r=".5"><stop offset="0" stop-color="var(--amber)" stop-opacity=".26"/><stop offset="1" stop-color="var(--amber)" stop-opacity="0"/></radialGradient></defs><ellipse cx="200" cy="112" rx="128" ry="96" fill="url(#hgGlow)"/><path d="M 0.0 150.0 L 46.0 122.0 L 88.0 141.0 L 140.0 106.0 L 196.0 138.0 L 250.0 110.0 L 306.0 140.0 L 356.0 118.0 L 400.0 146.0 L 400.0 186.0 L 0.0 186.0 Z" fill="var(--brand)" opacity="0.10"/><path d="M 0.0 168.0 L 54.0 148.0 L 110.0 164.0 L 168.0 142.0 L 232.0 166.0 L 292.0 146.0 L 348.0 165.0 L 400.0 152.0 L 400.0 186.0 L 0.0 186.0 Z" fill="var(--brand)" opacity="0.14"/><rect x="0" y="186" width="400" height="28" fill="url(#hgGround)"/><line x1="0" y1="186" x2="400" y2="186" stroke="var(--brand)" stroke-opacity=".30" stroke-width="1.6"/><g class="sway1"><rect x="12.57" y="178.00" width="2.86" height="8.60" rx="1.00" fill="var(--brand)" opacity="0.20"/><path d="M 8.94 156.68 L 14.00 146.00 L 19.06 156.68 Z" fill="var(--brand)" opacity="0.20"/><path d="M 5.97 169.14 L 14.00 157.46 L 22.03 169.14 Z" fill="var(--brand)" opacity="0.20"/><path d="M 3.00 181.60 L 14.00 168.93 L 25.00 181.60 Z" fill="var(--brand)" opacity="0.20"/></g><g class="sway2"><rect x="34.90" y="180.00" width="2.21" height="6.60" rx="0.77" fill="var(--brand)" opacity="0.20"/><path d="M 32.09 164.01 L 36.00 156.00 L 39.91 164.01 Z" fill="var(--brand)" opacity="0.20"/><path d="M 29.80 173.35 L 36.00 164.60 L 42.20 173.35 Z" fill="var(--brand)" opacity="0.20"/><path d="M 27.50 182.70 L 36.00 173.19 L 44.50 182.70 Z" fill="var(--brand)" opacity="0.20"/></g><g class="sway3"><rect x="364.70" y="178.80" width="2.60" height="7.80" rx="0.91" fill="var(--brand)" opacity="0.20"/><path d="M 361.40 159.61 L 366.00 150.00 L 370.60 159.61 Z" fill="var(--brand)" opacity="0.20"/><path d="M 358.70 170.83 L 366.00 160.32 L 373.30 170.83 Z" fill="var(--brand)" opacity="0.20"/><path d="M 356.00 182.04 L 366.00 170.63 L 376.00 182.04 Z" fill="var(--brand)" opacity="0.20"/></g><g class="sway4"><rect x="386.96" y="180.40" width="2.08" height="6.20" rx="0.73" fill="var(--brand)" opacity="0.20"/><path d="M 384.32 165.48 L 388.00 158.00 L 391.68 165.48 Z" fill="var(--brand)" opacity="0.20"/><path d="M 382.16 174.20 L 388.00 166.02 L 393.84 174.20 Z" fill="var(--brand)" opacity="0.20"/><path d="M 380.00 182.92 L 388.00 174.05 L 396.00 182.92 Z" fill="var(--brand)" opacity="0.20"/></g><g class="sway1"><rect x="127.00" y="180.80" width="2.00" height="5.80" rx="0.70" fill="var(--brand)" opacity="0.20"/><path d="M 124.55 166.94 L 128.00 160.00 L 131.45 166.94 Z" fill="var(--brand)" opacity="0.20"/><path d="M 122.53 175.04 L 128.00 167.45 L 133.47 175.04 Z" fill="var(--brand)" opacity="0.20"/><path d="M 120.50 183.14 L 128.00 174.90 L 135.50 183.14 Z" fill="var(--brand)" opacity="0.20"/></g><g class="sway2"><rect x="271.00" y="181.20" width="2.00" height="5.40" rx="0.70" fill="var(--brand)" opacity="0.20"/><path d="M 268.78 168.41 L 272.00 162.00 L 275.22 168.41 Z" fill="var(--brand)" opacity="0.20"/><path d="M 266.89 175.88 L 272.00 168.88 L 277.11 175.88 Z" fill="var(--brand)" opacity="0.20"/><path d="M 265.00 183.36 L 272.00 175.76 L 279.00 183.36 Z" fill="var(--brand)" opacity="0.20"/></g><g class="sway1"><rect x="27.01" y="169.20" width="5.98" height="17.40" rx="2.09" fill="var(--wood)" opacity="0.55"/><path d="M 19.42 124.43 L 30.00 102.00 L 40.58 124.43 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 15.28 141.87 L 30.00 118.05 L 44.72 141.87 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 11.14 159.32 L 30.00 134.10 L 48.86 159.32 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 7.00 176.76 L 30.00 150.15 L 53.00 176.76 Z" fill="var(--brand-2)" opacity="0.55"/></g><g class="sway2"><rect x="63.79" y="173.60" width="4.42" height="13.00" rx="1.55" fill="var(--wood)" opacity="0.55"/><path d="M 58.18 140.55 L 66.00 124.00 L 73.82 140.55 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 55.12 153.43 L 66.00 135.85 L 76.88 153.43 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 52.06 166.30 L 66.00 147.69 L 79.94 166.30 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 49.00 179.18 L 66.00 159.54 L 83.00 179.18 Z" fill="var(--brand-2)" opacity="0.55"/></g><g class="sway3"><rect x="96.62" y="166.80" width="6.76" height="19.80" rx="2.37" fill="var(--wood)" opacity="0.55"/><path d="M 88.04 115.63 L 100.00 90.00 L 111.96 115.63 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 83.36 135.57 L 100.00 108.34 L 116.64 135.57 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 78.68 155.50 L 100.00 126.68 L 121.32 155.50 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 74.00 175.44 L 100.00 145.02 L 126.00 175.44 Z" fill="var(--brand-2)" opacity="0.55"/></g><g class="sway4"><rect x="130.05" y="175.20" width="3.90" height="11.40" rx="1.36" fill="var(--wood)" opacity="0.55"/><path d="M 125.10 146.42 L 132.00 132.00 L 138.90 146.42 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 122.40 157.63 L 132.00 142.32 L 141.60 157.63 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 119.70 168.85 L 132.00 152.63 L 144.30 168.85 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 117.00 180.06 L 132.00 162.95 L 147.00 180.06 Z" fill="var(--brand-2)" opacity="0.55"/></g><g class="sway1"><rect x="265.99" y="174.80" width="4.03" height="11.80" rx="1.41" fill="var(--wood)" opacity="0.55"/><path d="M 260.87 144.95 L 268.00 130.00 L 275.13 144.95 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 258.08 156.58 L 268.00 140.70 L 277.92 156.58 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 255.29 168.21 L 268.00 151.40 L 280.71 168.21 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 252.50 179.84 L 268.00 162.10 L 283.50 179.84 Z" fill="var(--brand-2)" opacity="0.55"/></g><g class="sway2"><rect x="296.75" y="167.60" width="6.50" height="19.00" rx="2.27" fill="var(--wood)" opacity="0.55"/><path d="M 288.50 118.56 L 300.00 94.00 L 311.50 118.56 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 284.00 137.67 L 300.00 111.58 L 316.00 137.67 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 279.50 156.77 L 300.00 129.15 L 320.50 156.77 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 275.00 175.88 L 300.00 146.73 L 325.00 175.88 Z" fill="var(--brand-2)" opacity="0.55"/></g><g class="sway3"><rect x="331.66" y="172.80" width="4.68" height="13.80" rx="1.64" fill="var(--wood)" opacity="0.55"/><path d="M 325.72 137.62 L 334.00 120.00 L 342.28 137.62 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 322.48 151.33 L 334.00 132.61 L 345.52 151.33 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 319.24 165.03 L 334.00 145.22 L 348.76 165.03 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 316.00 178.74 L 334.00 157.83 L 352.00 178.74 Z" fill="var(--brand-2)" opacity="0.55"/></g><g class="sway4"><rect x="367.14" y="169.60" width="5.72" height="17.00" rx="2.00" fill="var(--wood)" opacity="0.55"/><path d="M 359.88 125.89 L 370.00 104.00 L 380.12 125.89 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 355.92 142.92 L 370.00 119.67 L 384.08 142.92 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 351.96 159.95 L 370.00 135.33 L 388.04 159.95 Z" fill="var(--brand-2)" opacity="0.55"/><path d="M 348.00 176.98 L 370.00 151.00 L 392.00 176.98 Z" fill="var(--brand-2)" opacity="0.55"/></g><ellipse class="ombra" cx="200" cy="187" rx="50" ry="7" fill="var(--brand)" opacity=".22"/><g transform="translate(150 83) scale(1.00)"><g class="dondolo"><g fill="var(--brand)"><path d="M 0.00 104.00 L 100.00 104.00 L 100.00 0.00 L 0.00 16.00 Z M 5.20 19.90 L 94.80 7.02 L 94.80 98.80 L 5.20 98.80 Z"/><path d="M 15.00 52.00 L 45.00 52.00 L 45.00 39.25 L 41.17 37.00 L 45.00 34.75 L 45.00 22.00 L 15.00 22.00 L 15.00 34.75 L 18.82 37.00 L 15.00 39.25 Z M 21.00 28.00 L 39.00 28.00 L 39.00 33.70 L 21.00 33.70 Z M 21.00 40.30 L 39.00 40.30 L 39.00 46.00 L 21.00 46.00 Z"/><path d="M 55.00 52.00 L 61.00 52.00 L 61.00 22.00 L 55.00 22.00 Z"/><path d="M 79.00 52.00 L 85.00 52.00 L 85.00 22.00 L 79.00 22.00 Z"/><path d="M 55.00 28.00 L 85.00 28.00 L 85.00 22.00 L 55.00 22.00 Z"/><path d="M 67.00 39.40 L 73.00 39.40 L 73.00 22.00 L 67.00 22.00 Z"/><path d="M 15.00 92.00 L 21.00 92.00 L 21.00 62.00 L 15.00 62.00 Z"/><path d="M 35.71 62.00 L 23.28 77.00 L 35.71 92.00 L 43.50 92.00 L 31.07 77.00 L 43.50 62.00 Z"/><path d="M 55.00 86.00 L 61.00 86.00 L 61.00 62.00 L 55.00 62.00 Z"/><path d="M 55.00 92.00 L 85.00 92.00 L 85.00 86.00 L 55.00 86.00 Z"/></g></g></g></svg>
   <div class="hero-txt">
-    <h1 class="hero-h">CuboDendro</h1>
+    <h1 class="hero-h">DendroCubo</h1>
     <p class="hero-p">L'app di campo dell'Istituto Tecnico Agrario: misura il bosco con quello che
       hai già in tasca. Cubatura del soprassuolo, altezza degli alberi con l'inclinometro del telefono,
       area di saggio con il GPS, lettura e datazione degli anelli. Tutto dentro un unico file,
@@ -624,6 +638,14 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
     </button>
 
     <button class="feat-c" data-go="dat">
+      <span class="feat-h"><span class="feat-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3.5h11l3 3V20.5H5z"/><path d="M8.5 8.5h7M8.5 12h7M8.5 15.5h4"/></svg></span><span class="feat-t">Registro dei rilievi</span></span>
+      <span class="feat-d">Ogni misura viene salvata da sola nel telefono ogni due secondi: se l'app si chiude
+        per sbaglio, non hai perso niente. Più rilievi separati, uno per area di saggio, con i loro conteggi.
+        E un codice del docente che impedisce agli allievi di cancellare per scherzo.</span>
+      <span class="feat-k">Scheda Dati</span>
+    </button>
+
+    <button class="feat-c" data-go="dat">
       <span class="feat-h"><span class="feat-i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></span><span class="feat-t">Dati, salvataggio ed esportazione</span></span>
       <span class="feat-d">Ogni tabella esce in CSV, pronta per il foglio di calcolo che userete in aula.
         Il rilievo si salva e si ripristina come file, così una classe può passarlo a un'altra. E qui trovi
@@ -651,6 +673,7 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
     <div class="cifra"><b>3</b><span>sensori usati: inclinometro, fotocamera, GPS</span></div>
     <div class="cifra"><b>2</b><span>formule per l'altezza: seni e tangenti</span></div>
     <div class="cifra"><b>0</b><span>dati personali raccolti</span></div>
+    <div class="cifra"><b>2 s</b><span>fra un salvataggio e l'altro</span></div>
   </div>
   <div class="note">Nessuna libreria di terzi, nessun font remoto, nessun servizio esterno: l'app è un
     file solo. È questo che le permette di funzionare in Val Talagona, dove il telefono non prende.</div>
@@ -660,7 +683,7 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
   <h2>Prima di partire</h2>
   <ol class="proto">
     <li><b>Installa l'app a casa, non il mattino dell'uscita.</b> Apri la scheda <i>Dati</i> e usa
-      «Installa sul telefono»: da quel momento CuboDendro parte anche in modalità aereo.</li>
+      «Installa sul telefono»: da quel momento DendroCubo parte anche in modalità aereo.</li>
     <li><b>Provala in modalità aereo la sera prima.</b> Se si apre e le tavole si vedono, sei a posto.</li>
     <li><b>Concedi i permessi quando l'app li chiede.</b> Servono al momento dell'uso: il sensore di
       inclinazione per l'altezza, la fotocamera per il mirino e per le carote, la posizione per l'area di
@@ -1151,6 +1174,7 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
     <h3 style="margin-top:16px">Mirino</h3>
     <div class="maptools">
       <label class="switch"><input type="checkbox" id="camOn" checked><span></span>Mira guardando lo schermo</label>
+      <button class="ghost" id="camRiavvia" style="flex:0 0 auto;width:auto">↻ Riavvia mirino</button>
     </div>
     <div id="camErr" class="warnbox" hidden></div>
     <div class="camwrap" id="camWrap" hidden>
@@ -1682,11 +1706,113 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
 
 <!-- ============ DATI ============ -->
 <section id="tab-dat" hidden>
+  <!-- ============ REGISTRO DEI RILIEVI ============ -->
+  <div class="card" id="cardRegistro">
+    <h2>Registro dei rilievi</h2>
+
+    <div class="regbar">
+      <div class="regbar-t">
+        <span class="k">Rilievo aperto</span>
+        <span class="v" id="regNome">—</span>
+        <span class="regsub" id="regSub">nessun dato</span>
+      </div>
+      <div class="regsave" id="regSave">—</div>
+    </div>
+
+    <div class="tiles" style="margin-top:11px">
+      <div class="tile"><div class="k">Alberi</div><div class="v" id="regNAlb">0</div></div>
+      <div class="tile"><div class="k">Altezze</div><div class="v" id="regNAlt">0</div></div>
+      <div class="tile"><div class="k">Carote</div><div class="v" id="regNCar">0</div></div>
+      <div class="tile"><div class="k">Pendenze</div><div class="v" id="regNPen">0</div></div>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <button class="act" id="regNuovo">＋ Nuovo rilievo</button>
+      <button class="ghost" id="regRinomina">✎ Rinomina</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="ghost" id="regEsporta">⬇ Esporta questo</button>
+      <button class="ghost" id="regEsportaTutto">⬇ Esporta tutto</button>
+    </div>
+
+    <h3>Rilievi salvati su questo telefono</h3>
+    <div class="scroll"><table class="nums" id="regTab"></table></div>
+
+    <div style="margin-top:12px">
+      <label for="regImporta">Riapri un registro esportato (.json)</label>
+      <input id="regImporta" type="file" accept=".json,application/json">
+    </div>
+
+    <details style="margin-top:12px">
+      <summary>Dove finiscono i dati, esattamente</summary>
+      <p>Ogni misura che prendi viene scritta <b>ogni due secondi nella memoria del browser di questo
+        telefono</b>, dentro il rilievo aperto. Non parte niente verso internet: non c'è nessun server, e
+        infatti tutto questo funziona anche in modalità aereo.</p>
+      <p>Vuol dire che se l'app si chiude per sbaglio, se il telefono si spegne o se ricarichi la pagina,
+        <b>i dati sono ancora lì</b> quando riapri. È la ragione principale per cui il registro esiste: nella
+        versione precedente bastava un tocco sbagliato per perdere una mattinata di rilievo.</p>
+      <p>Vuol anche dire tre cose meno comode, ed è giusto saperle:</p>
+      <ul class="chk">
+        <li>I dati stanno <b>solo su quel telefono</b>. Un altro allievo, con un altro telefono, non li vede.
+          Per metterli insieme si esporta e si uniscono in aula.</li>
+        <li>Se disinstalli l'app, o svuoti i dati del browser dalle impostazioni del telefono, <b>spariscono</b>.
+          Il browser può anche liberarli da solo se lo spazio scarseggia.</li>
+        <li>Non sono un archivio. <b>A fine giornata si esporta</b> — il file JSON o i CSV — e si mette al
+          sicuro sul computer. Il registro serve a non perdere niente <i>durante</i> l'uscita.</li>
+      </ul>
+    </details>
+
+    <div class="row" style="margin-top:10px">
+      <button class="danger" id="regDel">🗑 Elimina il rilievo aperto</button>
+    </div>
+  </div>
+
+  <!-- ============ BLOCCO DOCENTE ============ -->
+  <div class="card" id="cardBlocco">
+    <h2>Blocco docente</h2>
+
+    <div id="bloccoOff">
+      <p>Il telefono passa di mano fra gli allievi, e basta un tocco distratto su una crocetta per far sparire
+        una carota o un'area di saggio intera. Con un <b>codice del docente</b> le cancellazioni restano
+        possibili solo a te.</p>
+      <div class="grid g2">
+        <div><label for="bloccoPin">Codice (da 4 a 8 cifre)</label>
+          <input id="bloccoPin" type="password" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="es. 1830"></div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="act" id="bloccoImposta">Attiva il blocco</button></div>
+      </div>
+    </div>
+
+    <div id="bloccoOn" hidden>
+      <div class="verdict" id="bloccoStato">
+        <span class="verdict-badge" id="bloccoBadge">—</span>
+        <div class="verdict-sub" id="bloccoTesto" style="margin-top:9px"></div>
+      </div>
+      <div class="row" style="margin-top:11px">
+        <button class="act" id="bloccoSblocca">🔓 Sblocca</button>
+        <button class="ghost" id="bloccoBlocca">🔒 Blocca</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="ghost" id="bloccoRimuovi">Rimuovi il blocco</button>
+      </div>
+      <div class="note">Il blocco si richiude da solo dopo <b>dieci minuti</b> e a ogni riavvio dell'app.</div>
+    </div>
+
+    <div class="note" style="background:var(--warn-soft);border-left-color:var(--warn);margin-top:12px">
+      <b>Che cosa protegge e che cosa no.</b> Protegge dalle cancellazioni per sbaglio o per scherzo: senza
+      codice, l'app rifiuta di svuotare lo storico, di eliminare un rilievo, una carota, un albero o una
+      misura. <b>Non è una password di sicurezza informatica</b>: i dati stanno in chiaro sul telefono, e chi
+      sa dove mettere le mani nelle impostazioni del browser può cancellarli comunque, blocco o non blocco.
+      È un lucchetto da spogliatoio, non una cassaforte — e per l'uso che ne facciamo va benissimo. La vera
+      difesa contro la perdita dei dati resta una sola: <b>esportare a fine giornata</b>.
+    </div>
+  </div>
+
   <div class="card" id="cardInstall">
     <h2>Installare l'app</h2>
-    <p class="muted">CuboDendro si installa direttamente dal browser: non passa da uno store, non chiede
+    <p class="muted">DendroCubo si installa direttamente dal browser: non passa da uno store, non chiede
       account, non occupa quasi spazio. Una volta installata funziona <b>senza connessione</b>.</p>
-    <button class="act" id="btnInstall" hidden>⤓ Installa CuboDendro</button>
+    <button class="act" id="btnInstall" hidden>⤓ Installa DendroCubo</button>
     <div id="installMsg" class="note" hidden></div>
     <details open><summary>Android — Chrome</summary>
       <ol class="proto">
@@ -1700,7 +1826,7 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
         <li>Scorri e scegli <b>Aggiungi a Home</b>, poi <b>Aggiungi</b>.</li>
       </ol></details>
     <div class="warnbox"><b>Prova offline la sera prima.</b> Metti il telefono in modalità aereo, apri
-      CuboDendro dall'icona e inserisci due diametri di prova. Se funziona così, funzionerà in bosco.
+      DendroCubo dall'icona e inserisci due diametri di prova. Se funziona così, funzionerà in bosco.
       In Val Talagona non c'è campo.</div>
     <div class="note">L'ipsometro ha bisogno dei sensori di movimento, che i browser concedono solo alle
       pagine servite in <b>https</b>. Se apri l'app come file scaricato invece che dall'indirizzo web,
@@ -1709,8 +1835,10 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
 
   <div class="card">
     <h2>Salvataggio e ripristino</h2>
-    <div class="warnbox">Questa pagina <b>non salva nulla automaticamente</b>. Prima di chiuderla o di
-      ricaricarla, esportare il file di sessione. Sul telefono conviene esportare dopo ogni area di saggio.</div>
+    <div class="note">Dalla versione 4 l'app <b>salva da sola</b> nel registro qui sopra, ogni due secondi.
+      Questa scheda serve per il file di scambio: portare i dati su un altro telefono, consegnarli al docente,
+      aprirli in aula sul computer. <b>A fine giornata si esporta comunque</b>: il registro è una rete di
+      sicurezza durante l'uscita, non un archivio.</div>
     <div class="row">
       <button class="act" id="expAll">⬇ Esporta sessione (.json)</button>
     </div>
@@ -1778,7 +1906,7 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
   <div class="card">
     <h2>Crediti, fonti e licenze</h2>
     <div class="credits">
-      <p><b>CuboDendro</b> — versione 3.4<br>
+      <p><b>DendroCubo</b> — versione 4.0<br>
         Ideazione e sviluppo: <b>prof. Gianluca Simonetti</b><br>
         Dirigente scolastico: <b>dott.ssa Roberta Gasparini</b><br>
         Realizzata per l'<b>Istituto di Istruzione Superiore «8 Marzo – K. Lorenz»</b> di Mirano (VE),
@@ -1817,11 +1945,12 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
         in forests: dual-frequency receivers and raw GNSS data.</i> Forestry 94(2): 292–310.</p>
 
       <h3>Trattamento dei dati</h3>
-      <p>L'app <b>non raccoglie, non trasmette e non conserva</b> alcun dato personale. Tutto ciò che
-        inserisci resta nella memoria temporanea del browser e sparisce chiudendo la pagina, salvo quello
-        che esporti tu. Non usa cookie, non usa la memoria persistente del browser, non incorpora strumenti
-        di analisi. L'unica comunicazione verso l'esterno è il download delle mattonelle cartografiche,
-        se e quando attivi tu lo sfondo della mappa.</p>
+      <p>L'app <b>non raccoglie e non trasmette</b> alcun dato personale. Dalla versione 4.0 conserva i
+        rilievi in un <b>archivio locale sul telefono</b> — il registro — perché perdere una mattinata di
+        misure per una chiusura accidentale era il rischio più concreto. Quell'archivio contiene solo
+        misure forestali e i nomi che dai tu ai rilievi, resta sul dispositivo e non raggiunge nessun
+        server. Nessun cookie, nessuno strumento di analisi. L'unica comunicazione verso l'esterno è il
+        download delle mattonelle cartografiche, se e quando attivi tu lo sfondo della mappa.</p>
 
       <h3>Sensori e permessi</h3>
       <p><b>Accelerometro</b> — letto solo mentre usi l'ipsometro, dopo un tocco esplicito e il consenso
@@ -1845,7 +1974,7 @@ const CLIMA={"cols":["T01","T02","T03","T04","T05","T06","T07","T08","T09","T10"
 <script>
 "use strict";
 /* ============================================================
-   CuboDendro — applicazione di campo per cubatura forestale
+   DendroCubo — applicazione di campo per cubatura forestale
    e dendrocronologia. Tutto in un unico file, funziona offline.
    ============================================================ */
 
@@ -2865,8 +2994,55 @@ $('raggio').addEventListener('change', function(){ aggiornaVerdetto(); disegnaMa
    2) misura degli anelli su fotografia, con taratura sul righello
    ============================================================ */
 
-/* ---------------- 1 · mirino ---------------- */
-let camStream = null;
+/* ---------------- 1 · mirino ----------------
+   Il flusso video, sul telefono, non è affidabile: iOS lo sospende
+   quando l'app perde il fuoco anche per un istante, alcuni Android
+   lo interrompono quando lo schermo si affievolisce, e in entrambi i
+   casi il <video> resta lì fermo senza dire niente. Qui si sorveglia
+   il flusso e lo si rimette in moto da solo. */
+let camStream = null, camGuardia = null, camVeglia = null, camUltimoT = -1;
+
+/* lo schermo non deve spegnersi mentre stai mirando */
+async function camTieniAcceso(){
+  try{
+    if('wakeLock' in navigator && !camVeglia){
+      camVeglia = await navigator.wakeLock.request('screen');
+      camVeglia.addEventListener('release', function(){ camVeglia=null; });
+    }
+  }catch(e){ /* non concessa: pazienza, si continua lo stesso */ }
+}
+function camLasciaSpegnere(){
+  try{ if(camVeglia){ camVeglia.release(); camVeglia=null; } }catch(e){}
+}
+
+/* vero se il video sta davvero producendo fotogrammi */
+function camVivo(){
+  const v=$('camVideo');
+  if(!camStream || !v) return false;
+  const tr = camStream.getVideoTracks()[0];
+  if(!tr || tr.readyState!=='live' || tr.muted) return false;
+  if(v.paused || v.ended || v.readyState<2) return false;
+  return true;
+}
+function camSorveglia(){
+  if(camGuardia) return;
+  camGuardia = setInterval(function(){
+    if(!camStream) return;
+    const v=$('camVideo');
+    const fermo = (v && v.currentTime===camUltimoT);   /* nessun fotogramma nuovo */
+    camUltimoT = v ? v.currentTime : -1;
+    if(!camVivo() || fermo){
+      if(v && v.paused){ v.play().catch(function(){}); }
+      if(!camVivo()){ camRiavvia(); }
+    }
+  }, 3000);
+}
+function camRiavvia(){
+  const acceso = $('camOn') && $('camOn').checked;
+  camSpegni();
+  if(acceso && typeof IPS!=='undefined' && IPS.on) setTimeout(camAccendi, 300);
+}
+
 async function camAccendi(){
   const err=$('camErr'); err.hidden=true;
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !secureOk()){
@@ -2880,6 +3056,15 @@ async function camAccendi(){
       video:{ facingMode:{ideal:'environment'}, width:{ideal:1280}, height:{ideal:720} }, audio:false });
     const v=$('camVideo'); v.srcObject=camStream; await v.play().catch(function(){});
     $('camWrap').hidden=false;
+    camUltimoT=-1;
+    const tr = camStream.getVideoTracks()[0];
+    if(tr){
+      tr.addEventListener('ended', camRiavvia);
+      tr.addEventListener('mute',  camRiavvia);
+    }
+    v.addEventListener('pause', function(){ if(camStream) v.play().catch(function(){}); });
+    camSorveglia();
+    camTieniAcceso();
   }catch(e){
     $('camOn').checked=false;
     err.hidden=false;
@@ -2890,6 +3075,8 @@ async function camAccendi(){
   }
 }
 function camSpegni(){
+  if(camGuardia){ clearInterval(camGuardia); camGuardia=null; }
+  camLasciaSpegnere();
   if(camStream){ camStream.getTracks().forEach(function(t){ t.stop(); }); camStream=null; }
   const v=$('camVideo'); if(v) v.srcObject=null;
   $('camWrap').hidden=true;
@@ -2897,9 +3084,19 @@ function camSpegni(){
 if($('camOn')) $('camOn').addEventListener('change',function(){
   if(this.checked) camAccendi(); else camSpegni();
 });
-/* spegni la fotocamera quando l'app va in secondo piano */
-document.addEventListener('visibilitychange',function(){ if(document.hidden) { camSpegni();
-  if($('camOn')) $('camOn').checked=false; } });
+/* in secondo piano si spegne (batteria e privacy), ma tornando in primo
+   piano si riaccende da sola: prima restava spenta e sembrava un guasto */
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){ camSpegni(); }
+  else if($('camOn') && $('camOn').checked && typeof IPS!=='undefined' && IPS.on &&
+          document.getElementById('tab-ips') && !document.getElementById('tab-ips').hidden){
+    setTimeout(camAccendi, 400);
+  }
+});
+if($('camRiavvia')) $('camRiavvia').addEventListener('click', function(){
+  if($('camOn')) $('camOn').checked = true;
+  camRiavvia();
+});
 
 /* la fotocamera resta accesa solo mentre sei sulla scheda Altezza:
    consuma batteria e non ha senso altrove */
@@ -3683,14 +3880,394 @@ window.addEventListener('beforeinstallprompt', function(e){
   });
   window.addEventListener('appinstalled', function(){
     b.hidden = true;
-    if(msg){ msg.hidden=false; msg.textContent = 'CuboDendro è installata su questo dispositivo.'; }
+    if(msg){ msg.hidden=false; msg.textContent = 'DendroCubo è installata su questo dispositivo.'; }
   });
   /* già in modalità app installata */
   if(window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true){
     b.hidden = true;
-    if(msg){ msg.hidden=false; msg.textContent = 'Stai già usando CuboDendro come app installata.'; }
+    if(msg){ msg.hidden=false; msg.textContent = 'Stai già usando DendroCubo come app installata.'; }
   }
 })();
+</script>
+<script>
+"use strict";
+/* ============================================================
+   PARTE H — REGISTRO DEI RILIEVI E BLOCCO DOCENTE
+
+   Fino alla 3.4 l'app non conservava nulla: bastava ricaricare la
+   pagina per perdere la mattinata. Qui si introduce un registro
+   persistente, tenuto nella memoria locale del browser:
+
+     · autosalvataggio ogni 2 s, e comunque quando l'app va in
+       secondo piano o viene chiusa;
+     · più rilievi separati (una per area di saggio, di norma),
+       con nome, gruppo e conteggi;
+     · esportazione singola o totale, e riapertura da file;
+     · cancellazioni protette da un codice del docente.
+
+   Nessun dato esce dal telefono: non c'è nessun server.
+   ============================================================ */
+
+const K_REG = 'dendrocubo.registro.v1';
+const K_PIN = 'dendrocubo.blocco.v1';
+const SBLOCCO_MS = 10*60*1000;      /* il blocco si richiude da solo */
+
+const REG = { rilievi:[], attivo:null, ultimo:'', salvatoIl:null, sbloccatoFino:0, pin:null };
+
+/* ---------- accesso alla memoria, sempre difensivo ----------
+   In navigazione privata, con i dati dei siti bloccati o con la
+   memoria piena, localStorage lancia. Non deve mai far cadere l'app. */
+function memLeggi(k){
+  try{ return window.localStorage.getItem(k); }catch(e){ return null; }
+}
+function memScrivi(k,v){
+  try{ window.localStorage.setItem(k,v); return true; }
+  catch(e){
+    REG.erroreMem = e && e.name === 'QuotaExceededError'
+      ? 'La memoria del browser è piena: esporta e poi elimina qualche rilievo vecchio.'
+      : 'Questo browser non permette di salvare in locale (navigazione privata?). Esporta spesso a mano.';
+    return false;
+  }
+}
+
+/* ---------- lo stato di lavoro, fotografato e ripristinato ---------- */
+function regStato(){
+  return {
+    raggio: $('raggio') ? $('raggio').value : null,
+    soglia: $('soglia') ? $('soglia').value : null,
+    ads:    $('adsName') ? $('adsName').value : '',
+    gruppo: $('gruppo') ? $('gruppo').value : '',
+    trees:  (typeof S!=='undefined' && S.trees) ? S.trees : [],
+    cores:  (typeof S!=='undefined' && S.cores) ? S.cores : [],
+    carotaAttiva: (typeof S!=='undefined') ? S.active : null,
+    altezze:  (typeof IPS!=='undefined') ? IPS.hist : [],
+    pendenze: (typeof IPS!=='undefined') ? IPS.pend : [],
+    centro:   (typeof GPS!=='undefined' && GPS.centro) ? GPS.centro : null
+  };
+}
+function regApplica(d){
+  if(!d) return;
+  if(d.raggio && $('raggio')) $('raggio').value = d.raggio;
+  if(d.soglia && $('soglia')) $('soglia').value = d.soglia;
+  if($('adsName')) $('adsName').value = d.ads || '';
+  if($('gruppo'))  $('gruppo').value  = d.gruppo || '';
+  if(typeof S!=='undefined'){
+    S.trees = d.trees || []; S.cores = d.cores || [];
+    S.active = d.carotaAttiva || (S.cores.length ? S.cores[0].id : null);
+  }
+  if(typeof IPS!=='undefined'){
+    IPS.hist = d.altezze || []; IPS.pend = d.pendenze || [];
+  }
+  if(typeof GPS!=='undefined' && d.centro) GPS.centro = d.centro;
+  if(typeof redrawAll==='function') redrawAll();
+  if(typeof ipsRenderHist==='function') ipsRenderHist();
+  if(typeof pendRender==='function') pendRender();
+  if(typeof disegnaMappa==='function'){ try{ disegnaMappa(); }catch(e){} }
+}
+function regConta(d){
+  d = d || {};
+  return { alb:(d.trees||[]).length, alt:(d.altezze||[]).length,
+           car:(d.cores||[]).length, pen:(d.pendenze||[]).length };
+}
+function regVuoto(d){ const c=regConta(d); return !(c.alb||c.alt||c.car||c.pen); }
+
+/* ---------- persistenza ---------- */
+function regNuovoId(){
+  return 'r' + (new Date()).getTime().toString(36) +
+         Math.floor(Math.random()*1e4).toString(36);
+}
+function regCorrente(){
+  return REG.rilievi.filter(function(r){ return r.id===REG.attivo; })[0] || null;
+}
+function regCarica(){
+  let o=null;
+  try{ o = JSON.parse(memLeggi(K_REG)||'null'); }catch(e){ o=null; }
+  if(o && Array.isArray(o.rilievi) && o.rilievi.length){
+    REG.rilievi = o.rilievi; REG.attivo = o.attivo || o.rilievi[0].id;
+  } else {
+    REG.rilievi = [{ id:regNuovoId(), nome:'Rilievo 1', creato:oraISO(),
+                     aggiornato:oraISO(), dati:null }];
+    REG.attivo = REG.rilievi[0].id;
+  }
+  const r = regCorrente();
+  if(r && r.dati) regApplica(r.dati);
+  REG.ultimo = JSON.stringify(regStato());
+}
+function oraISO(){ return (new Date()).toISOString(); }
+function oraBreve(iso){
+  if(!iso) return '—';
+  const d=new Date(iso);
+  return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+' '+
+         String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+function regSalva(forza){
+  const s = regStato();
+  const j = JSON.stringify(s);
+  if(!forza && j===REG.ultimo) return false;      /* niente di cambiato */
+  const r = regCorrente(); if(!r) return false;
+  r.dati = s; r.aggiornato = oraISO();
+  r.gruppo = s.gruppo || r.gruppo || '';
+  const ok = memScrivi(K_REG, JSON.stringify({v:1, rilievi:REG.rilievi, attivo:REG.attivo}));
+  REG.ultimo = j;
+  if(ok){ REG.salvatoIl = new Date(); REG.erroreMem = null; }
+  regRender();
+  return ok;
+}
+
+/* ---------- blocco docente ----------
+   Il codice è conservato come impronta SHA-256: non si legge in chiaro
+   dalla memoria. Resta però un lucchetto, non una cassaforte — chi
+   svuota i dati del sito dalle impostazioni del browser porta via
+   tutto comunque, ed è scritto chiaramente nella scheda. */
+async function impronta(testo){
+  try{
+    const b = new TextEncoder().encode('dendrocubo:'+testo);
+    const h = await crypto.subtle.digest('SHA-256', b);
+    return Array.from(new Uint8Array(h)).map(function(x){ return x.toString(16).padStart(2,'0'); }).join('');
+  }catch(e){
+    /* ripiego se crypto.subtle non c'è: impronta debole, ma il ruolo è lo stesso */
+    let h=5381; for(let i=0;i<testo.length;i++) h=((h*33)^testo.charCodeAt(i))>>>0;
+    return 'x'+h.toString(16);
+  }
+}
+function bloccoCarica(){
+  let o=null;
+  try{ o = JSON.parse(memLeggi(K_PIN)||'null'); }catch(e){ o=null; }
+  REG.pin = (o && o.pin) ? o.pin : null;
+  REG.sbloccatoFino = 0;                      /* a ogni avvio si riparte chiusi */
+}
+function bloccoAttivo(){ return !!REG.pin; }
+function bloccoAperto(){
+  return !REG.pin || (new Date()).getTime() < REG.sbloccatoFino;
+}
+async function bloccoChiedi(motivo){
+  if(bloccoAperto()) return true;
+  const p = prompt((motivo||'Serve il codice del docente.')+'\n\nCodice:');
+  if(p===null) return false;
+  const h = await impronta(p.trim());
+  if(h===REG.pin){
+    REG.sbloccatoFino = (new Date()).getTime()+SBLOCCO_MS;
+    bloccoRender();
+    return true;
+  }
+  alert('Codice errato.');
+  return false;
+}
+function bloccoRender(){
+  const off=$('bloccoOff'), on=$('bloccoOn');
+  if(!off||!on) return;
+  off.hidden = bloccoAttivo(); on.hidden = !bloccoAttivo();
+  if(!bloccoAttivo()) return;
+  const ap = bloccoAperto();
+  const box=$('bloccoStato'), b=$('bloccoBadge');
+  box.className = 'verdict '+(ap?'in':'out');
+  b.className = 'verdict-badge '+(ap?'in':'out');
+  b.textContent = ap ? 'SBLOCCATO' : 'BLOCCATO';
+  const min = ap ? Math.max(0,Math.round((REG.sbloccatoFino-(new Date()).getTime())/60000)) : 0;
+  $('bloccoTesto').textContent = ap
+    ? 'Le cancellazioni sono permesse ancora per circa '+min+' minuti, poi il blocco si richiude da solo.'
+    : 'Nessuno può cancellare dati senza il codice. Le misure si prendono normalmente.';
+}
+
+/* ---------- il guardiano delle cancellazioni ----------
+   Intercetta il clic in fase di cattura, cioè PRIMA che arrivi al
+   gestore che cancella: così non serve modificare ogni pulsante. */
+const PROTETTI = ['#clrCub','#ipsClr','#pendClr','#regDel','[data-del]',
+                  '[data-ipsdel]','[data-pdel]','[data-regdel]'];
+document.addEventListener('click', function(e){
+  if(!bloccoAttivo() || bloccoAperto()) return;
+  const t = e.target.closest ? e.target.closest(PROTETTI.join(',')) : null;
+  if(!t) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  bloccoChiedi('Per cancellare dei dati serve il codice del docente.').then(function(ok){
+    if(ok) alert('Sbloccato. Tocca di nuovo per confermare la cancellazione.');
+  });
+}, true);
+
+/* ---------- interfaccia del registro ---------- */
+function regRender(){
+  const r = regCorrente();
+  const c = regConta(r ? r.dati : null);
+  if($('regNome')) $('regNome').textContent = r ? r.nome : '—';
+  if($('regSub'))  $('regSub').textContent  = r
+      ? ((r.gruppo?r.gruppo+' · ':'')+'aperto il '+oraBreve(r.creato))
+      : 'nessun rilievo';
+  if($('regNAlb')) $('regNAlb').textContent = c.alb;
+  if($('regNAlt')) $('regNAlt').textContent = c.alt;
+  if($('regNCar')) $('regNCar').textContent = c.car;
+  if($('regNPen')) $('regNPen').textContent = c.pen;
+
+  const sv=$('regSave');
+  if(sv){
+    if(REG.erroreMem){ sv.textContent='⚠ non salvato'; sv.title=REG.erroreMem; sv.className='regsave ko'; }
+    else if(REG.salvatoIl){
+      sv.textContent='✓ salvato '+String(REG.salvatoIl.getHours()).padStart(2,'0')+':'+
+        String(REG.salvatoIl.getMinutes()).padStart(2,'0')+':'+
+        String(REG.salvatoIl.getSeconds()).padStart(2,'0');
+      sv.className='regsave ok'; sv.title='';
+    } else { sv.textContent='in attesa di dati'; sv.className='regsave'; }
+  }
+  if(REG.erroreMem && $('regErr')) $('regErr').textContent = REG.erroreMem;
+
+  const t=$('regTab'); if(!t) return;
+  let h='<tr><th style="text-align:left">Rilievo</th><th>Alberi</th><th>Alt.</th><th>Car.</th>'+
+        '<th>Aggiornato</th><th></th></tr>';
+  REG.rilievi.forEach(function(x){
+    const k=regConta(x.dati), att = x.id===REG.attivo;
+    h+='<tr'+(att?' style="background:var(--brand-soft)"':'')+'>'+
+       '<td style="text-align:left">'+(att?'<b>▸ ':'')+x.nome+(att?'</b>':'')+
+         (x.gruppo?'<br><span class="muted">'+x.gruppo+'</span>':'')+'</td>'+
+       '<td>'+k.alb+'</td><td>'+k.alt+'</td><td>'+k.car+'</td>'+
+       '<td>'+oraBreve(x.aggiornato)+'</td>'+
+       '<td>'+(att?'<span class="muted">aperto</span>'
+                 :'<button class="chip" data-regopen="'+x.id+'">apri</button>')+
+         ' <button class="chip" data-regdel="'+x.id+'" style="color:var(--bad)">✕</button></td></tr>';
+  });
+  t.innerHTML=h;
+  t.querySelectorAll('button[data-regopen]').forEach(function(b){
+    b.addEventListener('click', function(){ regApri(b.dataset.regopen); });
+  });
+  t.querySelectorAll('button[data-regdel]').forEach(function(b){
+    b.addEventListener('click', function(){ regElimina(b.dataset.regdel); });
+  });
+}
+
+function regApri(id){
+  if(id===REG.attivo) return;
+  regSalva(true);                                  /* prima si mette al sicuro quello aperto */
+  REG.attivo = id;
+  const r = regCorrente();
+  regApplica(r ? r.dati : null);
+  if(!r || !r.dati) regApplica({trees:[],cores:[],altezze:[],pendenze:[]});
+  REG.ultimo = JSON.stringify(regStato());
+  memScrivi(K_REG, JSON.stringify({v:1, rilievi:REG.rilievi, attivo:REG.attivo}));
+  regRender();
+  alert('Aperto: '+(r?r.nome:'—')+'.\nLe schede Cubatura, Altezza e Anelli ora mostrano i suoi dati.');
+}
+
+function regElimina(id){
+  const x = REG.rilievi.filter(function(r){ return r.id===id; })[0];
+  if(!x) return;
+  const k=regConta(x.dati);
+  if(!confirm('Eliminare «'+x.nome+'»?\n\n'+k.alb+' alberi, '+k.alt+' altezze, '+k.car+
+              ' carote.\n\nL\'operazione non si può annullare.')) return;
+  REG.rilievi = REG.rilievi.filter(function(r){ return r.id!==id; });
+  if(!REG.rilievi.length){
+    REG.rilievi=[{id:regNuovoId(), nome:'Rilievo 1', creato:oraISO(), aggiornato:oraISO(), dati:null}];
+  }
+  if(REG.attivo===id){
+    REG.attivo = REG.rilievi[0].id;
+    regApplica(REG.rilievi[0].dati || {trees:[],cores:[],altezze:[],pendenze:[]});
+    REG.ultimo = JSON.stringify(regStato());
+  }
+  memScrivi(K_REG, JSON.stringify({v:1, rilievi:REG.rilievi, attivo:REG.attivo}));
+  regRender();
+}
+
+/* ---------- eventi ---------- */
+if($('regNuovo')) $('regNuovo').addEventListener('click', function(){
+  regSalva(true);
+  const prec = regCorrente();
+  const n = prompt('Nome del nuovo rilievo:', 'Rilievo '+(REG.rilievi.length+1));
+  if(n===null) return;
+  const r = { id:regNuovoId(), nome:n.trim()||('Rilievo '+(REG.rilievi.length+1)),
+              gruppo: prec ? (prec.gruppo||'') : '', creato:oraISO(), aggiornato:oraISO(), dati:null };
+  REG.rilievi.push(r); REG.attivo = r.id;
+  /* il raggio e il gruppo si ereditano: cambia l'area, non la squadra */
+  const raggio = $('raggio') ? $('raggio').value : null;
+  regApplica({trees:[],cores:[],altezze:[],pendenze:[],raggio:raggio,
+              gruppo: r.gruppo, ads:r.nome});
+  REG.ultimo=''; regSalva(true);
+});
+
+if($('regRinomina')) $('regRinomina').addEventListener('click', function(){
+  const r = regCorrente(); if(!r) return;
+  const n = prompt('Nome del rilievo:', r.nome);
+  if(n===null) return;
+  r.nome = n.trim() || r.nome;
+  regSalva(true);
+});
+
+function regNomeFile(s){ return String(s||'rilievo').replace(/[^\wàèéìòùÀÈÉÌÒÙ -]/g,'').replace(/\s+/g,'_'); }
+
+if($('regEsporta')) $('regEsporta').addEventListener('click', function(){
+  regSalva(true);
+  const r = regCorrente(); if(!r) return;
+  download('rilievo_'+regNomeFile(r.nome)+'_'+stamp()+'.json',
+    JSON.stringify({app:'DendroCubo', v:1, esportato:oraISO(), rilievi:[r]}, null, 1),
+    'application/json');
+});
+if($('regEsportaTutto')) $('regEsportaTutto').addEventListener('click', function(){
+  regSalva(true);
+  download('registro_dendrocubo_'+stamp()+'.json',
+    JSON.stringify({app:'DendroCubo', v:1, esportato:oraISO(), rilievi:REG.rilievi}, null, 1),
+    'application/json');
+});
+if($('regImporta')) $('regImporta').addEventListener('change', function(e){
+  const f=e.target.files[0]; if(!f) return;
+  const rd=new FileReader();
+  rd.onload=function(){
+    try{
+      const o=JSON.parse(rd.result);
+      let entranti = [];
+      if(o && Array.isArray(o.rilievi)) entranti = o.rilievi;
+      else if(o && (o.trees||o.cores))                     /* vecchio file di sessione */
+        entranti = [{ id:regNuovoId(), nome:'Sessione importata', creato:oraISO(), aggiornato:oraISO(),
+                      dati:{trees:o.trees||[], cores:o.cores||[], raggio:o.raggio, soglia:o.soglia,
+                            altezze:[], pendenze:[]} }];
+      if(!entranti.length){ alert('Nel file non ci sono rilievi.'); return; }
+      let nuovi=0;
+      entranti.forEach(function(r){
+        if(!r || !r.id) return;
+        if(REG.rilievi.some(function(x){ return x.id===r.id; })){
+          r = Object.assign({}, r, {id:regNuovoId(), nome:(r.nome||'Rilievo')+' (copia)'});
+        }
+        REG.rilievi.push(r); nuovi++;
+      });
+      memScrivi(K_REG, JSON.stringify({v:1, rilievi:REG.rilievi, attivo:REG.attivo}));
+      regRender();
+      alert('Importati '+nuovi+' rilievi. Aprili dall\'elenco qui sopra.');
+    }catch(err){ alert('File non leggibile: '+err.message); }
+  };
+  rd.readAsText(f); e.target.value='';
+});
+if($('regDel')) $('regDel').addEventListener('click', function(){ regElimina(REG.attivo); });
+
+/* blocco */
+if($('bloccoImposta')) $('bloccoImposta').addEventListener('click', async function(){
+  const p = ($('bloccoPin').value||'').trim();
+  if(!/^\d{4,8}$/.test(p)){ alert('Il codice deve essere da 4 a 8 cifre.'); return; }
+  REG.pin = await impronta(p);
+  memScrivi(K_PIN, JSON.stringify({pin:REG.pin}));
+  REG.sbloccatoFino = (new Date()).getTime()+SBLOCCO_MS;
+  $('bloccoPin').value='';
+  bloccoRender();
+  alert('Blocco attivo. Segnati il codice: se lo dimentichi, l\'unico modo per riavere le cancellazioni '+
+        'è togliere il blocco svuotando i dati del sito dalle impostazioni del browser — e con quelli se ne '+
+        'vanno anche i rilievi. Esporta, per prudenza.');
+});
+if($('bloccoSblocca')) $('bloccoSblocca').addEventListener('click', function(){
+  bloccoChiedi('Inserisci il codice del docente per sbloccare.');
+});
+if($('bloccoBlocca')) $('bloccoBlocca').addEventListener('click', function(){
+  REG.sbloccatoFino=0; bloccoRender();
+});
+if($('bloccoRimuovi')) $('bloccoRimuovi').addEventListener('click', async function(){
+  if(!await bloccoChiedi('Inserisci il codice per togliere il blocco.')) return;
+  REG.pin=null; REG.sbloccatoFino=0;
+  try{ window.localStorage.removeItem(K_PIN); }catch(e){}
+  bloccoRender();
+});
+
+/* ---------- autosalvataggio ---------- */
+regCarica();
+bloccoCarica();
+regRender();
+bloccoRender();
+setInterval(function(){ regSalva(false); }, 2000);
+setInterval(bloccoRender, 30000);
+document.addEventListener('visibilitychange', function(){ if(document.hidden) regSalva(true); });
+window.addEventListener('pagehide', function(){ regSalva(true); });
 </script>
 <script>
 "use strict";

@@ -1,0 +1,101 @@
+  <!-- ============ REGISTRO DEI RILIEVI ============ -->
+  <div class="card" id="cardRegistro">
+    <h2>Registro dei rilievi</h2>
+
+    <div class="regbar">
+      <div class="regbar-t">
+        <span class="k">Rilievo aperto</span>
+        <span class="v" id="regNome">—</span>
+        <span class="regsub" id="regSub">nessun dato</span>
+      </div>
+      <div class="regsave" id="regSave">—</div>
+    </div>
+
+    <div class="tiles" style="margin-top:11px">
+      <div class="tile"><div class="k">Alberi</div><div class="v" id="regNAlb">0</div></div>
+      <div class="tile"><div class="k">Altezze</div><div class="v" id="regNAlt">0</div></div>
+      <div class="tile"><div class="k">Carote</div><div class="v" id="regNCar">0</div></div>
+      <div class="tile"><div class="k">Pendenze</div><div class="v" id="regNPen">0</div></div>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <button class="act" id="regNuovo">＋ Nuovo rilievo</button>
+      <button class="ghost" id="regRinomina">✎ Rinomina</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="ghost" id="regEsporta">⬇ Esporta questo</button>
+      <button class="ghost" id="regEsportaTutto">⬇ Esporta tutto</button>
+    </div>
+
+    <h3>Rilievi salvati su questo telefono</h3>
+    <div class="scroll"><table class="nums" id="regTab"></table></div>
+
+    <div style="margin-top:12px">
+      <label for="regImporta">Riapri un registro esportato (.json)</label>
+      <input id="regImporta" type="file" accept=".json,application/json">
+    </div>
+
+    <details style="margin-top:12px">
+      <summary>Dove finiscono i dati, esattamente</summary>
+      <p>Ogni misura che prendi viene scritta <b>ogni due secondi nella memoria del browser di questo
+        telefono</b>, dentro il rilievo aperto. Non parte niente verso internet: non c'è nessun server, e
+        infatti tutto questo funziona anche in modalità aereo.</p>
+      <p>Vuol dire che se l'app si chiude per sbaglio, se il telefono si spegne o se ricarichi la pagina,
+        <b>i dati sono ancora lì</b> quando riapri. È la ragione principale per cui il registro esiste: nella
+        versione precedente bastava un tocco sbagliato per perdere una mattinata di rilievo.</p>
+      <p>Vuol anche dire tre cose meno comode, ed è giusto saperle:</p>
+      <ul class="chk">
+        <li>I dati stanno <b>solo su quel telefono</b>. Un altro allievo, con un altro telefono, non li vede.
+          Per metterli insieme si esporta e si uniscono in aula.</li>
+        <li>Se disinstalli l'app, o svuoti i dati del browser dalle impostazioni del telefono, <b>spariscono</b>.
+          Il browser può anche liberarli da solo se lo spazio scarseggia.</li>
+        <li>Non sono un archivio. <b>A fine giornata si esporta</b> — il file JSON o i CSV — e si mette al
+          sicuro sul computer. Il registro serve a non perdere niente <i>durante</i> l'uscita.</li>
+      </ul>
+    </details>
+
+    <div class="row" style="margin-top:10px">
+      <button class="danger" id="regDel">🗑 Elimina il rilievo aperto</button>
+    </div>
+  </div>
+
+  <!-- ============ BLOCCO DOCENTE ============ -->
+  <div class="card" id="cardBlocco">
+    <h2>Blocco docente</h2>
+
+    <div id="bloccoOff">
+      <p>Il telefono passa di mano fra gli allievi, e basta un tocco distratto su una crocetta per far sparire
+        una carota o un'area di saggio intera. Con un <b>codice del docente</b> le cancellazioni restano
+        possibili solo a te.</p>
+      <div class="grid g2">
+        <div><label for="bloccoPin">Codice (da 4 a 8 cifre)</label>
+          <input id="bloccoPin" type="password" inputmode="numeric" autocomplete="off" maxlength="8" placeholder="es. 1830"></div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="act" id="bloccoImposta">Attiva il blocco</button></div>
+      </div>
+    </div>
+
+    <div id="bloccoOn" hidden>
+      <div class="verdict" id="bloccoStato">
+        <span class="verdict-badge" id="bloccoBadge">—</span>
+        <div class="verdict-sub" id="bloccoTesto" style="margin-top:9px"></div>
+      </div>
+      <div class="row" style="margin-top:11px">
+        <button class="act" id="bloccoSblocca">🔓 Sblocca</button>
+        <button class="ghost" id="bloccoBlocca">🔒 Blocca</button>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="ghost" id="bloccoRimuovi">Rimuovi il blocco</button>
+      </div>
+      <div class="note">Il blocco si richiude da solo dopo <b>dieci minuti</b> e a ogni riavvio dell'app.</div>
+    </div>
+
+    <div class="note" style="background:var(--warn-soft);border-left-color:var(--warn);margin-top:12px">
+      <b>Che cosa protegge e che cosa no.</b> Protegge dalle cancellazioni per sbaglio o per scherzo: senza
+      codice, l'app rifiuta di svuotare lo storico, di eliminare un rilievo, una carota, un albero o una
+      misura. <b>Non è una password di sicurezza informatica</b>: i dati stanno in chiaro sul telefono, e chi
+      sa dove mettere le mani nelle impostazioni del browser può cancellarli comunque, blocco o non blocco.
+      È un lucchetto da spogliatoio, non una cassaforte — e per l'uso che ne facciamo va benissimo. La vera
+      difesa contro la perdita dei dati resta una sola: <b>esportare a fine giornata</b>.
+    </div>
+  </div>

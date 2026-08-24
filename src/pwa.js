@@ -37,12 +37,12 @@ window.addEventListener('beforeinstallprompt', function(e){
   });
   window.addEventListener('appinstalled', function(){
     b.hidden = true;
-    if(msg){ msg.hidden=false; msg.textContent = 'CuboDendro è installata su questo dispositivo.'; }
+    if(msg){ msg.hidden=false; msg.textContent = 'DendroCubo è installata su questo dispositivo.'; }
   });
   /* già in modalità app installata */
   if(window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true){
     b.hidden = true;
-    if(msg){ msg.hidden=false; msg.textContent = 'Stai già usando CuboDendro come app installata.'; }
+    if(msg){ msg.hidden=false; msg.textContent = 'Stai già usando DendroCubo come app installata.'; }
   }
 })();
 </script>

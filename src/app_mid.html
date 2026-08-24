@@ -175,11 +175,13 @@
 
 <!-- ============ DATI ============ -->
 <section id="tab-dat" hidden>
+<!--INCLUDI:registro_section.html-->
+
   <div class="card" id="cardInstall">
     <h2>Installare l'app</h2>
-    <p class="muted">CuboDendro si installa direttamente dal browser: non passa da uno store, non chiede
+    <p class="muted">DendroCubo si installa direttamente dal browser: non passa da uno store, non chiede
       account, non occupa quasi spazio. Una volta installata funziona <b>senza connessione</b>.</p>
-    <button class="act" id="btnInstall" hidden>⤓ Installa CuboDendro</button>
+    <button class="act" id="btnInstall" hidden>⤓ Installa DendroCubo</button>
     <div id="installMsg" class="note" hidden></div>
     <details open><summary>Android — Chrome</summary>
       <ol class="proto">
@@ -193,7 +195,7 @@
         <li>Scorri e scegli <b>Aggiungi a Home</b>, poi <b>Aggiungi</b>.</li>
       </ol></details>
     <div class="warnbox"><b>Prova offline la sera prima.</b> Metti il telefono in modalità aereo, apri
-      CuboDendro dall'icona e inserisci due diametri di prova. Se funziona così, funzionerà in bosco.
+      DendroCubo dall'icona e inserisci due diametri di prova. Se funziona così, funzionerà in bosco.
       In Val Talagona non c'è campo.</div>
     <div class="note">L'ipsometro ha bisogno dei sensori di movimento, che i browser concedono solo alle
       pagine servite in <b>https</b>. Se apri l'app come file scaricato invece che dall'indirizzo web,
@@ -202,8 +204,10 @@
 
   <div class="card">
     <h2>Salvataggio e ripristino</h2>
-    <div class="warnbox">Questa pagina <b>non salva nulla automaticamente</b>. Prima di chiuderla o di
-      ricaricarla, esportare il file di sessione. Sul telefono conviene esportare dopo ogni area di saggio.</div>
+    <div class="note">Dalla versione 4 l'app <b>salva da sola</b> nel registro qui sopra, ogni due secondi.
+      Questa scheda serve per il file di scambio: portare i dati su un altro telefono, consegnarli al docente,
+      aprirli in aula sul computer. <b>A fine giornata si esporta comunque</b>: il registro è una rete di
+      sicurezza durante l'uscita, non un archivio.</div>
     <div class="row">
       <button class="act" id="expAll">⬇ Esporta sessione (.json)</button>
     </div>
@@ -271,7 +275,7 @@
   <div class="card">
     <h2>Crediti, fonti e licenze</h2>
     <div class="credits">
-      <p><b>CuboDendro</b> — versione 3.4<br>
+      <p><b>DendroCubo</b> — versione 4.0<br>
         Ideazione e sviluppo: <b>prof. Gianluca Simonetti</b><br>
         Dirigente scolastico: <b>dott.ssa Roberta Gasparini</b><br>
         Realizzata per l'<b>Istituto di Istruzione Superiore «8 Marzo – K. Lorenz»</b> di Mirano (VE),
@@ -310,11 +314,12 @@
         in forests: dual-frequency receivers and raw GNSS data.</i> Forestry 94(2): 292–310.</p>
 
       <h3>Trattamento dei dati</h3>
-      <p>L'app <b>non raccoglie, non trasmette e non conserva</b> alcun dato personale. Tutto ciò che
-        inserisci resta nella memoria temporanea del browser e sparisce chiudendo la pagina, salvo quello
-        che esporti tu. Non usa cookie, non usa la memoria persistente del browser, non incorpora strumenti
-        di analisi. L'unica comunicazione verso l'esterno è il download delle mattonelle cartografiche,
-        se e quando attivi tu lo sfondo della mappa.</p>
+      <p>L'app <b>non raccoglie e non trasmette</b> alcun dato personale. Dalla versione 4.0 conserva i
+        rilievi in un <b>archivio locale sul telefono</b> — il registro — perché perdere una mattinata di
+        misure per una chiusura accidentale era il rischio più concreto. Quell'archivio contiene solo
+        misure forestali e i nomi che dai tu ai rilievi, resta sul dispositivo e non raggiunge nessun
+        server. Nessun cookie, nessuno strumento di analisi. L'unica comunicazione verso l'esterno è il
+        download delle mattonelle cartografiche, se e quando attivi tu lo sfondo della mappa.</p>
 
       <h3>Sensori e permessi</h3>
       <p><b>Accelerometro</b> — letto solo mentre usi l'ipsometro, dopo un tocco esplicito e il consenso

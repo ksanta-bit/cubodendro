@@ -1,10 +1,10 @@
-/* CuboDendro — service worker
+/* DendroCubo — service worker
    Strategia: cache-first sull'app shell, con aggiornamento in background.
    L'app è progettata per funzionare completamente offline: una volta
    installata non effettua alcuna richiesta di rete per funzionare.
    Le mattonelle cartografiche di OpenStreetMap, facoltative, sono di
    altra origine e vengono deliberatamente escluse dalla cache. */
-const CACHE = 'cubodendro-v3.4.0';
+const CACHE = 'dendrocubo-v4.0.0';
 const SHELL = [
   './',
   './index.html',

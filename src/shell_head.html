@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>CuboDendro — cubatura e dendrocronologia forestale</title>
+<title>DendroCubo — cubatura e dendrocronologia forestale</title>
 <meta name="description" content="Applicazione di campo per la cubatura del soprassuolo, l'ipsometria con inclinometro e la dendrocronologia. I.I.S. «8 Marzo – K. Lorenz», Mirano (VE).">
 <meta name="author" content="Gianluca Simonetti">
 <meta name="theme-color" content="#153b2e">
@@ -11,14 +11,14 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="CuboDendro">
+<meta name="apple-mobile-web-app-title" content="DendroCubo">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <style>
 /* ============================================================
-   CuboDendro — foglio di stile
+   DendroCubo — foglio di stile
    Palette forestale: verde bosco, ambra, crema, legno.
    ============================================================ */
 :root{
@@ -290,6 +290,20 @@ details[open] summary{margin-bottom:9px}
 .testres.bad{border-color:var(--bad);background:var(--bad-soft)}
 .testres-h{font-size:16px;font-weight:800;margin-bottom:2px}
 
+/* ---------- registro dei rilievi ---------- */
+.regbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  background:var(--brand-soft);border:1px solid color-mix(in srgb,var(--brand) 20%,transparent);
+  border-radius:var(--r-sm);padding:12px 14px}
+.regbar-t{flex:1;min-width:0}
+.regbar-t .k{display:block;font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;
+  color:var(--text-muted);font-weight:800}
+.regbar-t .v{display:block;font-size:19px;font-weight:800;letter-spacing:-.02em;line-height:1.2;
+  overflow-wrap:break-word}
+.regbar-t .regsub{display:block;font-size:11.5px;color:var(--text-secondary);margin-top:2px}
+.regsave{flex:0 0 auto;font-size:11.5px;font-weight:800;color:var(--text-muted);
+  font-variant-numeric:tabular-nums}
+.regsave.ok{color:var(--good)} .regsave.ko{color:var(--bad)}
+
 /* ---------- figure esplicative ---------- */
 .figbox{margin:12px 0;padding:0}
 svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
@@ -462,10 +476,10 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
 </style>
 </head>
 <body>
-<div id="splash" role="status" aria-label="Avvio di CuboDendro">
+<div id="splash" role="status" aria-label="Avvio di DendroCubo">
   <div class="sp-in">
     <div class="sp-logo"><svg viewBox="0 0 100 104" xmlns="http://www.w3.org/2000/svg" fill="currentColor" fill-rule="evenodd" aria-hidden="true"><path d="M 0.00 104.00 L 100.00 104.00 L 100.00 0.00 L 0.00 16.00 Z M 5.20 19.90 L 94.80 7.02 L 94.80 98.80 L 5.20 98.80 Z"/><path d="M 15.00 52.00 L 45.00 52.00 L 45.00 39.25 L 41.17 37.00 L 45.00 34.75 L 45.00 22.00 L 15.00 22.00 L 15.00 34.75 L 18.82 37.00 L 15.00 39.25 Z M 21.00 28.00 L 39.00 28.00 L 39.00 33.70 L 21.00 33.70 Z M 21.00 40.30 L 39.00 40.30 L 39.00 46.00 L 21.00 46.00 Z"/><path d="M 55.00 52.00 L 61.00 52.00 L 61.00 22.00 L 55.00 22.00 Z"/><path d="M 79.00 52.00 L 85.00 52.00 L 85.00 22.00 L 79.00 22.00 Z"/><path d="M 55.00 28.00 L 85.00 28.00 L 85.00 22.00 L 55.00 22.00 Z"/><path d="M 67.00 39.40 L 73.00 39.40 L 73.00 22.00 L 67.00 22.00 Z"/><path d="M 15.00 92.00 L 21.00 92.00 L 21.00 62.00 L 15.00 62.00 Z"/><path d="M 35.71 62.00 L 23.28 77.00 L 35.71 92.00 L 43.50 92.00 L 31.07 77.00 L 43.50 62.00 Z"/><path d="M 55.00 86.00 L 61.00 86.00 L 61.00 62.00 L 55.00 62.00 Z"/><path d="M 55.00 92.00 L 85.00 92.00 L 85.00 86.00 L 55.00 86.00 Z"/></svg></div>
-    <div class="sp-name">CuboDendro</div>
+    <div class="sp-name">DendroCubo</div>
     <div class="sp-sub">Cubatura &middot; Ipsometria &middot; Dendrocronologia</div>
     <div class="sp-sch">Istituto di Istruzione Superiore<br>&laquo;8 Marzo &ndash; K. Lorenz&raquo; &middot; Mirano (VE)<br>Istituto Tecnico Agrario</div>
     <div class="sp-aut">prof. Gianluca Simonetti</div>
@@ -478,7 +492,7 @@ svg.fig{width:100%;height:auto;display:block;background:var(--surface-2);
   <div class="htop">
     <span class="logo"><svg viewBox="0 0 100 104" xmlns="http://www.w3.org/2000/svg" fill="currentColor" fill-rule="evenodd" aria-hidden="true"><path d="M 0.00 104.00 L 100.00 104.00 L 100.00 0.00 L 0.00 16.00 Z M 5.20 19.90 L 94.80 7.02 L 94.80 98.80 L 5.20 98.80 Z"/><path d="M 15.00 52.00 L 45.00 52.00 L 45.00 39.25 L 41.17 37.00 L 45.00 34.75 L 45.00 22.00 L 15.00 22.00 L 15.00 34.75 L 18.82 37.00 L 15.00 39.25 Z M 21.00 28.00 L 39.00 28.00 L 39.00 33.70 L 21.00 33.70 Z M 21.00 40.30 L 39.00 40.30 L 39.00 46.00 L 21.00 46.00 Z"/><path d="M 55.00 52.00 L 61.00 52.00 L 61.00 22.00 L 55.00 22.00 Z"/><path d="M 79.00 52.00 L 85.00 52.00 L 85.00 22.00 L 79.00 22.00 Z"/><path d="M 55.00 28.00 L 85.00 28.00 L 85.00 22.00 L 55.00 22.00 Z"/><path d="M 67.00 39.40 L 73.00 39.40 L 73.00 22.00 L 67.00 22.00 Z"/><path d="M 15.00 92.00 L 21.00 92.00 L 21.00 62.00 L 15.00 62.00 Z"/><path d="M 35.71 62.00 L 23.28 77.00 L 35.71 92.00 L 43.50 92.00 L 31.07 77.00 L 43.50 62.00 Z"/><path d="M 55.00 86.00 L 61.00 86.00 L 61.00 62.00 L 55.00 62.00 Z"/><path d="M 55.00 92.00 L 85.00 92.00 L 85.00 86.00 L 55.00 86.00 Z"/></svg></span>
     <div class="htxt">
-      <h1>CuboDendro</h1>
+      <h1>DendroCubo</h1>
       <span class="sub">Cubatura · ipsometria · dendrocronologia</span>
       <span class="sch">Istituto di Istruzione Superiore «8 Marzo &ndash; K. Lorenz» &middot; Mirano (VE)</span>
     </div>

@@ -6,8 +6,55 @@
    2) misura degli anelli su fotografia, con taratura sul righello
    ============================================================ */
 
-/* ---------------- 1 · mirino ---------------- */
-let camStream = null;
+/* ---------------- 1 · mirino ----------------
+   Il flusso video, sul telefono, non è affidabile: iOS lo sospende
+   quando l'app perde il fuoco anche per un istante, alcuni Android
+   lo interrompono quando lo schermo si affievolisce, e in entrambi i
+   casi il <video> resta lì fermo senza dire niente. Qui si sorveglia
+   il flusso e lo si rimette in moto da solo. */
+let camStream = null, camGuardia = null, camVeglia = null, camUltimoT = -1;
+
+/* lo schermo non deve spegnersi mentre stai mirando */
+async function camTieniAcceso(){
+  try{
+    if('wakeLock' in navigator && !camVeglia){
+      camVeglia = await navigator.wakeLock.request('screen');
+      camVeglia.addEventListener('release', function(){ camVeglia=null; });
+    }
+  }catch(e){ /* non concessa: pazienza, si continua lo stesso */ }
+}
+function camLasciaSpegnere(){
+  try{ if(camVeglia){ camVeglia.release(); camVeglia=null; } }catch(e){}
+}
+
+/* vero se il video sta davvero producendo fotogrammi */
+function camVivo(){
+  const v=$('camVideo');
+  if(!camStream || !v) return false;
+  const tr = camStream.getVideoTracks()[0];
+  if(!tr || tr.readyState!=='live' || tr.muted) return false;
+  if(v.paused || v.ended || v.readyState<2) return false;
+  return true;
+}
+function camSorveglia(){
+  if(camGuardia) return;
+  camGuardia = setInterval(function(){
+    if(!camStream) return;
+    const v=$('camVideo');
+    const fermo = (v && v.currentTime===camUltimoT);   /* nessun fotogramma nuovo */
+    camUltimoT = v ? v.currentTime : -1;
+    if(!camVivo() || fermo){
+      if(v && v.paused){ v.play().catch(function(){}); }
+      if(!camVivo()){ camRiavvia(); }
+    }
+  }, 3000);
+}
+function camRiavvia(){
+  const acceso = $('camOn') && $('camOn').checked;
+  camSpegni();
+  if(acceso && typeof IPS!=='undefined' && IPS.on) setTimeout(camAccendi, 300);
+}
+
 async function camAccendi(){
   const err=$('camErr'); err.hidden=true;
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !secureOk()){
@@ -21,6 +68,15 @@ async function camAccendi(){
       video:{ facingMode:{ideal:'environment'}, width:{ideal:1280}, height:{ideal:720} }, audio:false });
     const v=$('camVideo'); v.srcObject=camStream; await v.play().catch(function(){});
     $('camWrap').hidden=false;
+    camUltimoT=-1;
+    const tr = camStream.getVideoTracks()[0];
+    if(tr){
+      tr.addEventListener('ended', camRiavvia);
+      tr.addEventListener('mute',  camRiavvia);
+    }
+    v.addEventListener('pause', function(){ if(camStream) v.play().catch(function(){}); });
+    camSorveglia();
+    camTieniAcceso();
   }catch(e){
     $('camOn').checked=false;
     err.hidden=false;
@@ -31,6 +87,8 @@ async function camAccendi(){
   }
 }
 function camSpegni(){
+  if(camGuardia){ clearInterval(camGuardia); camGuardia=null; }
+  camLasciaSpegnere();
   if(camStream){ camStream.getTracks().forEach(function(t){ t.stop(); }); camStream=null; }
   const v=$('camVideo'); if(v) v.srcObject=null;
   $('camWrap').hidden=true;
@@ -38,9 +96,19 @@ function camSpegni(){
 if($('camOn')) $('camOn').addEventListener('change',function(){
   if(this.checked) camAccendi(); else camSpegni();
 });
-/* spegni la fotocamera quando l'app va in secondo piano */
-document.addEventListener('visibilitychange',function(){ if(document.hidden) { camSpegni();
-  if($('camOn')) $('camOn').checked=false; } });
+/* in secondo piano si spegne (batteria e privacy), ma tornando in primo
+   piano si riaccende da sola: prima restava spenta e sembrava un guasto */
+document.addEventListener('visibilitychange',function(){
+  if(document.hidden){ camSpegni(); }
+  else if($('camOn') && $('camOn').checked && typeof IPS!=='undefined' && IPS.on &&
+          document.getElementById('tab-ips') && !document.getElementById('tab-ips').hidden){
+    setTimeout(camAccendi, 400);
+  }
+});
+if($('camRiavvia')) $('camRiavvia').addEventListener('click', function(){
+  if($('camOn')) $('camOn').checked = true;
+  camRiavvia();
+});
 
 /* la fotocamera resta accesa solo mentre sei sulla scheda Altezza:
    consuma batteria e non ha senso altrove */

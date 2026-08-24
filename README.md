@@ -1,4 +1,4 @@
-# CuboDendro
+# DendroCubo
 
 Applicazione di campo per la **cubatura del soprassuolo forestale**, l'**ipsometria con l'inclinometro
 del telefono** e l'**analisi dendrocronologica** degli anelli di accrescimento.

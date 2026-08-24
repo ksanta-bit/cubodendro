@@ -10,7 +10,8 @@ cd "$(dirname "$0")"
   cat src/_sections_cub_den.html
   cat src/ipso_section.html
   cat src/area_section.html
-  cat src/app_mid.html
+  awk '/^<!--INCLUDI:/{ n=$0; sub(/^<!--INCLUDI:/,"",n); sub(/-->$/,"",n);
+        while((getline l < ("src/" n))>0) print l; close("src/" n); next } {print}' src/app_mid.html
   echo '</main>'
   echo '<script>'; cat src/clima.js; echo '</script>'
   cat src/app_js.html
@@ -20,6 +21,7 @@ cd "$(dirname "$0")"
   cat src/app_js2.html
   cat src/app_js3.html
   cat src/pwa.js
+  cat src/registro.js
   cat src/home.js
   echo '</body></html>'
 } > index.html

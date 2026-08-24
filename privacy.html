@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CuboDendro — Informativa privacy</title>
+<title>DendroCubo — Informativa privacy</title>
 <meta name="theme-color" content="#1F4E3D">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -30,21 +30,21 @@ footer{border-top:2px solid var(--amber);margin-top:36px;padding-top:16px;font-s
 </head>
 <body>
 <header><div class="wrap">
-  <h1>CuboDendro — Informativa privacy</h1>
+  <h1>DendroCubo — Informativa privacy</h1>
   <p>Istituto di Istruzione Superiore «8 Marzo – K. Lorenz» · Mirano (VE)</p>
 </div></header>
 
 <main class="wrap">
 
 <div class="box">
-  <p class="big" style="margin:0">CuboDendro non raccoglie alcun dato personale, non richiede registrazione
-  e non usa cookie. Nulla di ciò che inserisci lascia il tuo dispositivo.</p>
+  <p class="big" style="margin:0">DendroCubo non raccoglie alcun dato personale, non richiede registrazione
+  e non usa cookie. I rilievi vengono salvati in un archivio locale sul dispositivo, e nulla di ciò che inserisci lo lascia.</p>
   <p style="margin:8px 0 0">Un'unica eccezione, sotto il tuo controllo: se attivi lo sfondo cartografico
   della mappa, l'app scarica le mattonelle da OpenStreetMap. È spiegato al punto 7.</p>
 </div>
 
 <p>Questa informativa è resa ai sensi degli articoli 13 e 14 del Regolamento (UE) 2016/679 (GDPR) per
-l'applicazione <strong>CuboDendro</strong>, strumento didattico di dendrometria e dendrocronologia.</p>
+l'applicazione <strong>DendroCubo</strong>, strumento didattico di dendrometria e dendrocronologia.</p>
 
 <h2>1 · Titolare del trattamento</h2>
 <p>Istituto di Istruzione Superiore «8 Marzo – K. Lorenz»<br>
@@ -66,6 +66,7 @@ di accrescimento, angoli di inclinazione, distanze. Sono dati relativi ad alberi
   <tr><td>Fotocamera</td><td>Sì, solo su richiesta</td><td>Vedi il punto 5</td></tr>
   <tr><td>Microfono, rubrica, contatti</td><td><strong>No</strong></td><td>Non sono richiesti né accessibili</td></tr>
   <tr><td>Cookie, identificatori pubblicitari</td><td><strong>No</strong></td><td>Nessun cookie, nessun tracciamento, nessuna pubblicità</td></tr>
+  <tr><td>Archivio locale dei rilievi</td><td><strong>Sì, solo sul dispositivo</strong></td><td>Misure forestali e nomi dei rilievi, in <code>localStorage</code>; non trasmesso ad alcun server (§ 6)</td></tr>
   <tr><td>Statistiche d'uso, analytics</td><td><strong>No</strong></td><td>Nessuno strumento di analisi è incorporato</td></tr>
   <tr><td>Sensori di movimento (accelerometro)</td><td>Sì, solo su richiesta</td><td>Vedi il punto 3</td></tr>
   <tr><td>Misure forestali inserite dall'utente</td><td>Sì</td><td>Restano sul dispositivo, in memoria volatile</td></tr>
@@ -105,11 +106,26 @@ riguardo: registrano dove si trovava chi effettuava il rilievo, in quel momento.
 </ul>
 
 <h2>6 · Dove finiscono i dati inseriti</h2>
-<p>I dati inseriti restano nella memoria temporanea della pagina, sul dispositivo dell'utente. L'applicazione
-<strong>non utilizza</strong> la memoria persistente del browser (<code>localStorage</code>,
-<code>sessionStorage</code>, database locali) per i dati di rilievo: chiudendo l'applicazione, i dati non
-esportati vengono perduti. È una scelta deliberata, che evita che i dati di un gruppo di lavoro
-ricompaiano nella sessione di un altro.</p>
+<p>Dalla versione 4.0 l'applicazione conserva i dati di rilievo nella <strong>memoria persistente del
+browser</strong> (<code>localStorage</code>) del dispositivo su cui è installata, in un archivio locale
+chiamato «registro dei rilievi». Il salvataggio è automatico, avviene ogni due secondi e serve a impedire
+che una mattinata di lavoro sul campo vada perduta per una chiusura accidentale dell'applicazione.</p>
+<p>Questo archivio contiene esclusivamente <strong>dati di misura forestale</strong> — diametri, altezze,
+angoli, larghezze di anelli, pendenze, coordinate del centro dell'area di saggio — insieme ai nomi che
+l'utente attribuisce liberamente ai rilievi e ai gruppi di lavoro. Non contiene dati personali, non
+contiene identificatori del dispositivo o dell'utente, e <strong>non viene trasmesso ad alcun server</strong>:
+resta sul dispositivo. Nessun soggetto diverso da chi ha il dispositivo in mano vi ha accesso.</p>
+<p>Se l'utente indica nel nome di un rilievo o di un gruppo un dato riferibile a persone (ad esempio il
+cognome di un allievo), tale dato resta anch'esso confinato al dispositivo. Si raccomanda comunque di usare
+sigle di gruppo e non nomi di persona, come previsto dal protocollo didattico.</p>
+<p>L'archivio si cancella in tre modi, tutti nelle mani dell'utente: eliminando i singoli rilievi
+dall'applicazione, disinstallando l'applicazione, oppure svuotando i dati del sito dalle impostazioni del
+browser. Il browser stesso può liberarlo automaticamente in caso di spazio insufficiente sul dispositivo.</p>
+<p>L'applicazione consente inoltre di impostare un <strong>codice del docente</strong> che subordina le
+operazioni di cancellazione al suo inserimento. Il codice è conservato localmente sotto forma di impronta
+crittografica (SHA-256) e non è leggibile in chiaro. Si tratta di una misura contro le cancellazioni
+accidentali, non di una misura di sicurezza informatica: non cifra i dati e non impedisce a chi disponga
+fisicamente del dispositivo di rimuoverli agendo sulle impostazioni del browser.</p>
 <p>L'utente può esportare i propri dati in file CSV o JSON: tali file vengono salvati dove decide l'utente,
 sul proprio dispositivo, e non transitano da alcun server.</p>
 
@@ -174,13 +190,13 @@ indicati al punto 1, o proporre reclamo al Garante per la protezione dei dati pe
 </table>
 
 <h2>12 · Limitazione di responsabilità</h2>
-<p>CuboDendro è uno strumento didattico. Le stime che produce hanno finalità formativa e non sostituiscono
+<p>DendroCubo è uno strumento didattico. Le stime che produce hanno finalità formativa e non sostituiscono
 un rilievo dendrometrico professionale, una perizia estimativa o un piano di assestamento forestale.</p>
 
 <footer>
   <p>Versione 3.1 — ultimo aggiornamento: agosto 2026.<br>
   Eventuali modifiche a questa informativa saranno pubblicate a questo stesso indirizzo.</p>
-  <p><a href="index.html">← Torna a CuboDendro</a></p>
+  <p><a href="index.html">← Torna a DendroCubo</a></p>
 </footer>
 </main>
 </body>
