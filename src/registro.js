@@ -313,34 +313,149 @@ if($('regEsportaTutto')) $('regEsportaTutto').addEventListener('click', function
     'application/json');
 });
 if($('regImporta')) $('regImporta').addEventListener('change', function(e){
-  const f=e.target.files[0]; if(!f) return;
-  const rd=new FileReader();
-  rd.onload=function(){
-    try{
-      const o=JSON.parse(rd.result);
-      let entranti = [];
-      if(o && Array.isArray(o.rilievi)) entranti = o.rilievi;
-      else if(o && (o.trees||o.cores))                     /* vecchio file di sessione */
-        entranti = [{ id:regNuovoId(), nome:'Sessione importata', creato:oraISO(), aggiornato:oraISO(),
-                      dati:{trees:o.trees||[], cores:o.cores||[], raggio:o.raggio, soglia:o.soglia,
-                            altezze:[], pendenze:[]} }];
-      if(!entranti.length){ alert('Nel file non ci sono rilievi.'); return; }
-      let nuovi=0;
-      entranti.forEach(function(r){
-        if(!r || !r.id) return;
-        if(REG.rilievi.some(function(x){ return x.id===r.id; })){
-          r = Object.assign({}, r, {id:regNuovoId(), nome:(r.nome||'Rilievo')+' (copia)'});
-        }
-        REG.rilievi.push(r); nuovi++;
-      });
-      memScrivi(K_REG, JSON.stringify({v:1, rilievi:REG.rilievi, attivo:REG.attivo}));
-      regRender();
-      alert('Importati '+nuovi+' rilievi. Aprili dall\'elenco qui sopra.');
-    }catch(err){ alert('File non leggibile: '+err.message); }
-  };
-  rd.readAsText(f); e.target.value='';
+  const files = Array.prototype.slice.call(e.target.files||[]);
+  if(!files.length) return;
+  const msg=$('regImpMsg');
+  let letti=0, tot={nuovi:0, aggiornati:0, saltati:0}, guasti=[];
+  files.forEach(function(f){
+    const rd=new FileReader();
+    rd.onload=function(){
+      try{
+        const o=JSON.parse(rd.result);
+        let entranti = [];
+        if(o && Array.isArray(o.rilievi)) entranti = o.rilievi;
+        else if(o && (o.trees||o.cores))               /* vecchio file di sessione 3.x */
+          entranti = [{ id:regNuovoId(), nome:f.name.replace(/\.json$/i,''),
+                        creato:oraISO(), aggiornato:oraISO(),
+                        dati:{trees:o.trees||[], cores:o.cores||[], raggio:o.raggio, soglia:o.soglia,
+                              altezze:[], pendenze:[]} }];
+        const e2 = regUnisci(entranti);
+        tot.nuovi+=e2.nuovi; tot.aggiornati+=e2.aggiornati; tot.saltati+=e2.saltati;
+      }catch(err){ guasti.push(f.name); }
+      if(++letti===files.length) fine();
+    };
+    rd.onerror=function(){ guasti.push(f.name); if(++letti===files.length) fine(); };
+    rd.readAsText(f);
+  });
+  function fine(){
+    msg.hidden=false; msg.className='note';
+    let t='<b>'+files.length+(files.length===1?' file letto':' file letti')+'.</b> '+
+          tot.nuovi+' rilievi nuovi, '+tot.aggiornati+' aggiornati';
+    if(tot.saltati) t+=', '+tot.saltati+' già presenti in versione più recente (lasciati come stavano)';
+    t+='.';
+    if(guasti.length){ msg.className='note warnbox';
+      t+=' <br><b>Non leggibili:</b> '+guasti.join(', ')+'.'; }
+    msg.innerHTML=t;
+  }
+  e.target.value='';
 });
 if($('regDel')) $('regDel').addEventListener('click', function(){ regElimina(REG.attivo); });
+
+/* ---------- consegna: menu di condivisione del telefono ----------
+   È la strada per far finire il file in una cartella Drive senza che
+   l'app debba parlare con Google: la scelta della destinazione la fa
+   il sistema operativo, e Drive è una delle voci del menu. */
+if($('regInvia')) $('regInvia').addEventListener('click', async function(){
+  regSalva(true);
+  const r = regCorrente(); if(!r) return;
+  const m = $('regInviaMsg');
+  if(regVuoto(r.dati)){
+    m.hidden=false; m.className='note warnbox';
+    m.textContent='Il rilievo aperto è vuoto: non c\'è ancora niente da consegnare.';
+    return;
+  }
+  const testo = JSON.stringify({app:'DendroCubo', v:4, esportato:oraISO(), rilievi:[r]}, null, 1);
+  const nome  = 'rilievo_'+regNomeFile(r.nome)+'_'+stamp()+'.json';
+  try{
+    const file = new File([testo], nome, {type:'application/json'});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({ files:[file], title:'Rilievo '+r.nome,
+        text:'Rilievo «'+r.nome+'»'+(r.gruppo?' — '+r.gruppo:'')+' · DendroCubo' });
+      m.hidden=false; m.className='note'; m.textContent='Consegnato: '+nome;
+      return;
+    }
+  }catch(e){
+    if(e && e.name==='AbortError'){ return; }        /* l'utente ha annullato */
+  }
+  /* niente menu di condivisione (computer, browser vecchi): si scarica */
+  download(nome, testo, 'application/json');
+  m.hidden=false; m.className='note';
+  m.innerHTML='Questo dispositivo non ha il menu di condivisione: il file è stato <b>scaricato</b>. '+
+    'Trascinalo nella cartella Drive dell\'uscita, o allegalo dove serve.';
+});
+
+/* ---------- unione dei rilievi ricevuti ----------
+   Stessa consegna due volte: vince la più recente. È il caso normale,
+   perché un gruppo che si accorge di un errore rimanda il file. */
+function regUnisci(entranti){
+  let nuovi=0, aggiornati=0, saltati=0;
+  entranti.forEach(function(r){
+    if(!r || !r.id) return;
+    const i = REG.rilievi.findIndex(function(x){ return x.id===r.id; });
+    if(i<0){ REG.rilievi.push(r); nuovi++; return; }
+    const vecchio = REG.rilievi[i];
+    if(String(r.aggiornato||'') > String(vecchio.aggiornato||'')){
+      if(vecchio.id===REG.attivo){ REG.rilievi[i]=r; regApplica(r.dati); REG.ultimo=JSON.stringify(regStato()); }
+      else REG.rilievi[i]=r;
+      aggiornati++;
+    } else saltati++;
+  });
+  memScrivi(K_REG, JSON.stringify({v:1, rilievi:REG.rilievi, attivo:REG.attivo}));
+  regRender();
+  return {nuovi:nuovi, aggiornati:aggiornati, saltati:saltati};
+}
+
+/* ---------- CSV di tutta la classe ---------- */
+function csvScarica(nome, righe, intest){
+  if(!righe.length){ alert('Non ci sono dati di questo tipo in nessun rilievo del registro.'); return; }
+  const csv = intest.join(';')+'\n' + righe.map(function(r){ return r.join(';'); }).join('\n')+'\n';
+  download(nome+'_classe_'+stamp()+'.csv', csv.replace(/\./g,','));
+}
+function perOgniRilievo(fn){
+  const out=[];
+  REG.rilievi.forEach(function(r){
+    const d=r.dati||{}; const g=d.gruppo||r.gruppo||'';
+    fn(out, r, d, g);
+  });
+  return out;
+}
+if($('csvAlberi')) $('csvAlberi').addEventListener('click', function(){
+  regSalva(true);
+  const righe = perOgniRilievo(function(out,r,d,g){
+    (d.trees||[]).forEach(function(t,i){
+      out.push([r.nome, g, i+1, t.ads||'', t.sp||'', t.d1, (t.d2===null||t.d2===undefined)?'':t.d2,
+                Number(t.d).toFixed(2), (t.h===null||t.h===undefined)?'':t.h,
+                (typeof basimetrica==='function')?basimetrica(t.d).toFixed(5):'']);
+    });
+  });
+  csvScarica('alberi', righe,
+    ['rilievo','gruppo','n','area_saggio','specie','d1_cm','d2_cm','d_medio_cm','h_misurata_m','g_m2']);
+});
+if($('csvAltezze')) $('csvAltezze').addEventListener('click', function(){
+  regSalva(true);
+  const righe = perOgniRilievo(function(out,r,d,g){
+    (d.altezze||[]).forEach(function(a,i){
+      out.push([r.nome, g, i+1, a.rif||'', a.met==='sin'?'seni':'tangenti',
+                (a.Lb||0).toFixed(2), (a.Lc||0).toFixed(2), (a.D||0).toFixed(2),
+                a.base.toFixed(2), a.cima.toFixed(2), a.h.toFixed(2), a.dh.toFixed(2)]);
+    });
+  });
+  csvScarica('altezze', righe,
+    ['rilievo','gruppo','n','riferimento','metodo','dist_base_m','dist_cima_m','dist_orizz_m',
+     'angolo_base_gradi','angolo_cima_gradi','altezza_m','incertezza_m']);
+});
+if($('csvAnelli')) $('csvAnelli').addEventListener('click', function(){
+  regSalva(true);
+  const righe = perOgniRilievo(function(out,r,d,g){
+    (d.cores||[]).forEach(function(c){
+      (c.w||[]).forEach(function(w,i){
+        out.push([r.nome, g, c.id, c.y0||'', i+1, (c.y0? c.y0+i : ''), w]);
+      });
+    });
+  });
+  csvScarica('anelli', righe,
+    ['rilievo','gruppo','carota','anno_iniziale','n_anello','anno','larghezza_mm']);
+});
 
 /* blocco */
 if($('bloccoImposta')) $('bloccoImposta').addEventListener('click', async function(){

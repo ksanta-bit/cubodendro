@@ -4,7 +4,7 @@
    installata non effettua alcuna richiesta di rete per funzionare.
    Le mattonelle cartografiche di OpenStreetMap, facoltative, sono di
    altra origine e vengono deliberatamente escluse dalla cache. */
-const CACHE = 'dendrocubo-v4.0.0';
+const CACHE = 'dendrocubo-v4.1.0';
 const SHELL = [
   './',
   './index.html',

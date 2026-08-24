@@ -129,7 +129,27 @@ fisicamente del dispositivo di rimuoverli agendo sulle impostazioni del browser.
 <p>L'utente può esportare i propri dati in file CSV o JSON: tali file vengono salvati dove decide l'utente,
 sul proprio dispositivo, e non transitano da alcun server.</p>
 
-<h2>7 · Sfondo cartografico e funzionamento offline</h2>
+<h2>7 · Invio facoltativo al foglio di calcolo del docente</h2>
+<p>L'applicazione può, <strong>su richiesta esplicita dell'utente</strong> e solo se un docente ne ha
+configurato l'indirizzo sul dispositivo, trasmettere il rilievo a un foglio di calcolo Google che risiede
+nello spazio Drive dell'Istituto. La funzione è <strong>disattivata per impostazione predefinita</strong>:
+senza configurazione il pulsante di invio resta inattivo e nessun dato lascia il dispositivo.</p>
+<p>Quando la funzione è attiva e l'utente tocca «Invia al foglio», vengono trasmessi esclusivamente:
+i dati di misura del rilievo (diametri, altezze, angoli, larghezze degli anelli, pendenze), il nome del
+rilievo e del gruppo assegnati dall'utente, e — se registrate — le coordinate del centro dell'area di saggio.
+Non vengono trasmessi identificativi del dispositivo, dell'utente, del browser, né alcun dato di
+navigazione.</p>
+<p>Il destinatario è un'applicazione web di Google Apps Script pubblicata dal docente dal proprio foglio:
+i dati transitano quindi per l'infrastruttura Google Workspace dell'Istituto e vi restano. Titolare del
+trattamento resta l'Istituto; Google opera come responsabile del trattamento nell'ambito del contratto
+Workspace già in essere. Non sono coinvolti altri fornitori.</p>
+<p>Un invio effettuato in assenza di copertura di rete resta in attesa sul dispositivo e viene completato
+automaticamente al ripristino della connessione. Fino a quel momento il dato non ha lasciato il telefono.</p>
+<p>Poiché i nomi di rilievo e di gruppo sono liberamente scelti dagli utenti, si prescrive per il protocollo
+didattico l'uso di <strong>sigle di gruppo e non di nominativi</strong>: in tal modo il contenuto trasmesso
+non costituisce dato personale.</p>
+
+<h2>8 · Sfondo cartografico e funzionamento offline</h2>
 <p>Per funzionare in bosco senza copertura telefonica, l'applicazione conserva una copia dei propri file
 (pagina, icone, manifest) nella cache del browser tramite un <em>service worker</em>. Questa cache contiene
 esclusivamente i file dell'applicazione stessa: <strong>nessun dato dell'utente</strong>. Si svuota
@@ -150,23 +170,23 @@ dell'area di saggio funziona ugualmente, ed è quella che serve davvero a 13 m d
 librerie di terzi, non carica font remoti, non contatta servizi di analisi. Le serie climatiche sono
 incorporate staticamente nel file dell'applicazione al momento della pubblicazione.</p>
 
-<h2>8 · Destinatari e trasferimenti</h2>
+<h2>9 · Destinatari e trasferimenti</h2>
 <p>Non essendovi raccolta di dati personali, non vi sono destinatari e non vi è comunicazione o diffusione a
 terzi. L'unica comunicazione verso l'esterno è quella descritta al punto 7, verso i server di OpenStreetMap,
 che avviene solo su attivazione esplicita dell'utente.</p>
 
-<h2>9 · Minori</h2>
+<h2>10 · Minori</h2>
 <p>L'applicazione è destinata all'uso didattico da parte di studenti della scuola secondaria di secondo
 grado, anche minorenni. Proprio per questo è stata progettata in modo da non raccogliere alcun dato
 personale: non esiste profilazione né trattamento di dati riferibili agli allievi.</p>
 
-<h2>10 · Diritti dell'interessato</h2>
+<h2>11 · Diritti dell'interessato</h2>
 <p>Poiché non vengono raccolti dati personali, non sussistono trattamenti su cui esercitare i diritti di cui
 agli articoli 15–22 del GDPR. Chiunque ritenga diversamente può comunque rivolgersi al Titolare ai recapiti
 indicati al punto 1, o proporre reclamo al Garante per la protezione dei dati personali
 (<a href="https://www.garanteprivacy.it">www.garanteprivacy.it</a>).</p>
 
-<h2>11 · Fonti dei dati e attribuzioni</h2>
+<h2>12 · Fonti dei dati e attribuzioni</h2>
 <table>
   <tr><th>Fonte</th><th>Uso</th><th>Licenza</th></tr>
   <tr><td>Tabacchi G., Di Cosmo L., Gasparini P., Morelli S. (2011), CRA-MPF Trento</td>
@@ -189,7 +209,7 @@ indicati al punto 1, o proporre reclamo al Garante per la protezione dei dati pe
       <td>Utilizzati con l'autorizzazione dell'Istituto, che è titolare del marchio</td></tr>
 </table>
 
-<h2>12 · Limitazione di responsabilità</h2>
+<h2>13 · Limitazione di responsabilità</h2>
 <p>DendroCubo è uno strumento didattico. Le stime che produce hanno finalità formativa e non sostituiscono
 un rilievo dendrometrico professionale, una perizia estimativa o un piano di assestamento forestale.</p>
 

@@ -23,17 +23,56 @@
       <button class="ghost" id="regRinomina">✎ Rinomina</button>
     </div>
     <div class="row" style="margin-top:8px">
-      <button class="ghost" id="regEsporta">⬇ Esporta questo</button>
-      <button class="ghost" id="regEsportaTutto">⬇ Esporta tutto</button>
+      <button class="act" id="regInvia">📤 Consegna il rilievo</button>
     </div>
+    <div class="row" style="margin-top:8px">
+      <button class="ghost" id="regEsporta">⬇ Salva questo</button>
+      <button class="ghost" id="regEsportaTutto">⬇ Salva tutti</button>
+    </div>
+    <div id="regInviaMsg" class="note" hidden></div>
+
+    <details style="margin-top:10px">
+      <summary>Come si consegna un rilievo (e come finisce su Drive)</summary>
+      <p>Tocca <b>Consegna il rilievo</b>: il telefono apre il suo menu di condivisione, quello che usi per
+        mandare una foto. Da lì scegli dove far arrivare il file.</p>
+      <ol class="proto">
+        <li><b>Cartella Google Drive</b> — la via consigliata. Nel menu scegli <i>Drive</i> (Android) o
+          <i>Salva su Drive</i> (iPhone) e seleziona la cartella dell'uscita che il docente ha condiviso con
+          la classe. Da quel momento il rilievo è nel Drive dell'Istituto e il docente lo vede comparire.</li>
+        <li><b>Classroom</b> — se il docente ha aperto un compito «consegna del rilievo», il file si allega lì.</li>
+        <li><b>WhatsApp o mail</b> — funziona, ma i file si perdono nelle chat più facilmente di quanto sembri.</li>
+      </ol>
+      <div class="warnbox"><b>In bosco non parte niente.</b> Senza campo il menu di condivisione si apre lo
+        stesso, ma il caricamento su Drive resta in attesa: parte da solo appena il telefono ritrova la rete,
+        di solito già sul pullman. Non serve rifare niente — basta non disinstallare l'app prima.</div>
+      <p class="muted">Il file è un <code>.json</code>: contiene tutto il rilievo — alberi, altezze, carote,
+        pendenze, centro dell'area — e si riapre in questa stessa app, sul telefono del docente o sul computer
+        in aula.</p>
+    </details>
 
     <h3>Rilievi salvati su questo telefono</h3>
     <div class="scroll"><table class="nums" id="regTab"></table></div>
 
-    <div style="margin-top:12px">
-      <label for="regImporta">Riapri un registro esportato (.json)</label>
-      <input id="regImporta" type="file" accept=".json,application/json">
+    <h3>Unire i rilievi della classe — per il docente</h3>
+    <div style="margin-top:6px">
+      <label for="regImporta">Apri i file ricevuti dai gruppi (si possono scegliere tutti insieme)</label>
+      <input id="regImporta" type="file" accept=".json,application/json" multiple>
+      <div class="note">Prendili dalla cartella Drive, da Classroom o dalle chat e selezionali tutti in una
+        volta. L'app li <b>unisce</b> nel registro: se un gruppo ha consegnato due volte tiene la versione più
+        recente, invece di creare doppioni. Poi da qui esci con un CSV solo, che contiene tutte le aree di
+        saggio della classe.</div>
+      <div id="regImpMsg" class="note" hidden></div>
     </div>
+
+    <h3>Esporta l'insieme della classe</h3>
+    <div class="row">
+      <button class="ghost" id="csvAlberi">⬇ CSV alberi</button>
+      <button class="ghost" id="csvAltezze">⬇ CSV altezze</button>
+      <button class="ghost" id="csvAnelli">⬇ CSV anelli</button>
+    </div>
+    <div class="note">Tre tabelle pronte per il foglio di calcolo, con una colonna «rilievo» e una «gruppo»
+      che dicono da dove viene ogni riga. Sono l'insieme di <b>tutti</b> i rilievi presenti nel registro, non
+      solo di quello aperto.</div>
 
     <details style="margin-top:12px">
       <summary>Dove finiscono i dati, esattamente</summary>
@@ -56,6 +95,61 @@
 
     <div class="row" style="margin-top:10px">
       <button class="danger" id="regDel">🗑 Elimina il rilievo aperto</button>
+    </div>
+  </div>
+
+  <!-- ============ INVIO AL FOGLIO GOOGLE ============ -->
+  <div class="card" id="cardNuvola">
+    <h2>Invio al foglio del docente</h2>
+    <p>Oltre alla consegna del file, il rilievo può essere <b>spedito direttamente a un foglio di calcolo</b>
+      che sta nella cartella Drive del docente. Le righe compaiono nel foglio già divise in alberi, altezze,
+      anelli e pendenze, pronte da analizzare.</p>
+
+    <div id="nuvStato" class="note">—</div>
+
+    <div class="row" style="margin-top:11px">
+      <button class="act" id="nuvInvia">☁ Invia al foglio</button>
+      <button class="ghost" id="nuvInviaTutti">Invia tutti i rilievi</button>
+    </div>
+
+    <details style="margin-top:12px">
+      <summary>Configurazione — la fa il docente una volta sola</summary>
+      <p>Il collegamento non passa da nessun servizio esterno: è uno <b>script che vive dentro il tuo foglio
+        Google</b>, nella tua cartella Drive. Sei tu il proprietario dei dati, dall'inizio alla fine.</p>
+      <ol class="proto">
+        <li>Nella tua cartella Drive crea un nuovo <b>Foglio Google</b> e chiamalo, per esempio,
+          «Rilievi Domegge 2026».</li>
+        <li>Dal foglio: <b>Estensioni → Apps Script</b>. Si apre l'editor.</li>
+        <li>Cancella quello che c'è e incolla il codice del file <code>strumenti/foglio_google.gs</code>,
+          che trovi insieme all'app. In cima al codice metti la tua <b>chiave dell'uscita</b>: una parola
+          qualsiasi, serve solo a evitare che qualcuno scriva sul foglio per caso.</li>
+        <li><b>Distribuisci → Nuova distribuzione → Applicazione web</b>. Esegui come <i>Me stesso</i>,
+          accesso a <i>Chiunque</i>. Autorizza quando te lo chiede.</li>
+        <li>Copia l'indirizzo che finisce per <code>/exec</code> e incollalo qui sotto insieme alla chiave.</li>
+        <li>Tocca <b>Prova il collegamento</b>: se il foglio risponde, hai finito.</li>
+      </ol>
+      <div class="grid g2" style="margin-top:8px">
+        <div><label for="nuvUrl">Indirizzo dello script (…/exec)</label>
+          <input id="nuvUrl" type="url" inputmode="url" autocomplete="off"
+                 placeholder="https://script.google.com/macros/s/…/exec"></div>
+        <div><label for="nuvChiave">Chiave dell'uscita</label>
+          <input id="nuvChiave" type="text" autocomplete="off" placeholder="es. domegge2026"></div>
+      </div>
+      <div class="row" style="margin-top:8px">
+        <button class="act" id="nuvSalva">Salva la configurazione</button>
+        <button class="ghost" id="nuvProva">Prova il collegamento</button>
+      </div>
+      <div class="note">Indirizzo e chiave restano <b>su questo telefono</b>. Per gli allievi il modo più
+        rapido è dettarli, oppure proiettarli: sono due righe. Un telefono senza configurazione continua a
+        funzionare normalmente, semplicemente consegna il file invece di spedirlo.</div>
+    </details>
+
+    <div class="note" style="background:var(--warn-soft);border-left-color:var(--warn);margin-top:12px">
+      <b>Qui i dati escono dal telefono</b> — è l'unica funzione dell'app che lo fa, insieme allo sfondo
+      cartografico. Vanno in un foglio Google che sta nel Drive dell'Istituto e a cui accedi tu. Sono misure
+      forestali, non dati personali: per non trasformarli in dati personali, nei nomi dei gruppi
+      <b>usa sigle e non cognomi</b>. In bosco non parte niente: senza campo il rilievo resta in coda sul
+      telefono e viene spedito da solo appena c'è rete.
     </div>
   </div>
 

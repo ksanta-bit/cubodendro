@@ -22,6 +22,7 @@ cd "$(dirname "$0")"
   cat src/app_js3.html
   cat src/pwa.js
   cat src/registro.js
+  cat src/nuvola.js
   cat src/home.js
   echo '</body></html>'
 } > index.html
