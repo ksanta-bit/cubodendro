@@ -30,6 +30,33 @@ const IPS = {
   base:null, cima:null, hist:[], last:null,
   pend:[]                      /* letture di pendenza salvate       */
 };
+
+/* ---------- convenzione del segno dell'accelerometro ----------
+   La specifica W3C vuole, per un telefono disteso a schermo in su,
+   accelerationIncludingGravity.z = +9,8: così fanno Chrome e Firefox
+   su Android. iOS invece — e quindi OGNI browser su iPhone e iPad, che
+   usano tutti WebKit — passa il vettore di gravità di CoreMotion così
+   com'è: z = −9,8. Senza correzione, su iPhone l'angolo usciva col segno
+   rovesciato: la cima sotto l'orizzonte, la base sopra, l'altezza
+   negativa o assurda.
+
+   Si parte dalla piattaforma (iOS → −1, altrimenti +1) e poi lo si
+   verifica sul campo: l'evento deviceorientation, che anche WebKit
+   calcola secondo la specifica, dice da che parte deve stare z
+   (cos β · cos γ). Se per molte letture consecutive l'accelerometro dice
+   il contrario, il segno viene corretto: così l'app resta giusta anche
+   se un giorno Apple allineasse WebKit alla specifica. */
+function ipsIsIOS(){
+  const ua = navigator.userAgent || '';
+  return /iPad|iPhone|iPod/.test(ua) ||
+         (/Macintosh/.test(ua) && (navigator.maxTouchPoints||0) > 1);   /* iPad in modalità desktop */
+}
+IPS.segno = ipsIsIOS() ? -1 : 1;
+IPS.segnoDa = ipsIsIOS() ? 'iOS' : 'standard';
+IPS.voti = 0;                  /* >0: segno standard, <0: segno iOS  */
+IPS.segnoCerto = false;
+IPS.ori = null;                /* ultima lettura di orientamento     */
+const VOTI_SOGLIA = 25;
 const DEG = 180/Math.PI;
 const RAD = Math.PI/180;
 const DALFA = 0.7;             /* incertezza di mira, gradi         */
@@ -62,39 +89,53 @@ async function ipsAttiva(){
       'Apri l\'app dall\'indirizzo web che ti ha dato il docente.';
     return;
   }
+  /* iOS 13+: il permesso va chiesto DENTRO il tocco. Le due richieste
+     partono insieme, prima di qualunque await: se la seconda aspettasse
+     la prima, Safari potrebbe non considerarla più parte del gesto. */
+  const chiedeMoto = typeof DeviceMotionEvent!=='undefined' && typeof DeviceMotionEvent.requestPermission==='function';
+  const chiedeOri  = typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function';
+  let pMoto = null, pOri = null;
+  try{ if(chiedeMoto) pMoto = DeviceMotionEvent.requestPermission(); }catch(e){ pMoto = Promise.reject(e); }
+  try{ if(chiedeOri)  pOri  = DeviceOrientationEvent.requestPermission(); }catch(e){ pOri = Promise.resolve('denied'); }
+  if(pOri) pOri = Promise.resolve(pOri).catch(function(){ return 'denied'; });
   try{
-    if(typeof DeviceMotionEvent!=='undefined' && typeof DeviceMotionEvent.requestPermission==='function'){
-      const r = await DeviceMotionEvent.requestPermission();
-      if(r!=='granted'){
-        err.hidden=false;
-        err.innerHTML='<b>Permesso negato.</b> Su iPhone: Impostazioni → Safari → Movimento e orientamento → attiva, '+
-          'poi ricarica la pagina e riprova.';
-        return;
-      }
-    }
-    if(typeof DeviceOrientationEvent!=='undefined' && typeof DeviceOrientationEvent.requestPermission==='function'){
-      try{ await DeviceOrientationEvent.requestPermission(); }catch(e){}
+    const r = pMoto ? await pMoto : 'granted';
+    if(pOri) await pOri;
+    if(r!=='granted'){
+      err.hidden=false;
+      err.innerHTML='<b>Permesso ai sensori negato.</b> iPhone ricorda il «Non consentire» finché il browser '+
+        'resta aperto. Chiudi del tutto Safari — oppure l\'app DendroCubo, se l\'hai messa nella schermata Home — '+
+        'scorrendola via dal multitasking, riaprila, tocca di nuovo «Attiva l\'inclinometro» e scegli «Consenti».'+
+        '<br><b>Non cancellare i dati del sito</b> per risolvere: perderesti i rilievi salvati sul telefono.';
+      return;
     }
   }catch(e){
-    err.hidden=false; err.innerHTML='<b>Non è stato possibile attivare i sensori:</b> '+e.message; return;
+    err.hidden=false;
+    err.innerHTML='<b>Non è stato possibile attivare i sensori:</b> '+(e && e.message ? e.message : e)+
+      '<br>Riprova toccando di nuovo il pulsante.';
+    return;
   }
+  if(IPS.on) return;             /* già attivo: niente ascoltatori doppi */
 
   let got=false;
   const onMotion=function(ev){
     const a = ev.accelerationIncludingGravity;
-    if(!a || (a.x===null&&a.y===null&&a.z===null)) return;
+    if(!a || a.x===null || a.y===null || a.z===null) return;
     const m = Math.sqrt(a.x*a.x + a.y*a.y + a.z*a.z);
     if(!(m>1)) return;
-    got=true; IPS.src='accelerometro';
+    if(!got){ got=true; IPS.src='accelerometro'; ipsDiag(); }
+    ipsVerificaSegno(a.z/m, m);
+    const zs = IPS.segno * a.z / m;        /* z riportato alla convenzione della specifica */
     /* angolo di mira lungo l'asse della fotocamera */
-    ipsPush(Math.asin(Math.max(-1,Math.min(1, -a.z/m)))*DEG);
+    ipsPush(Math.asin(Math.max(-1,Math.min(1, -zs)))*DEG);
     /* inclinazione del piano del telefono, per la pendenza */
-    IPS.giu = (a.z < 0);
-    pendPush(Math.acos(Math.max(0,Math.min(1, Math.abs(a.z)/m)))*DEG);
+    IPS.giu = (zs < 0);
+    pendPush(Math.acos(Math.max(0,Math.min(1, Math.abs(zs))))*DEG);
   };
   const onOrient=function(ev){
-    if(got) return;
     if(ev.beta===null||ev.beta===undefined) return;
+    IPS.ori = {t:ora(), b:ev.beta, g:(ev.gamma||0)};
+    if(got) return;
     IPS.src='orientamento';
     ipsPush(ev.beta - 90);          /* ripiego: telefono in verticale, fotocamera in avanti */
     const b=(ev.beta||0)*RAD, g=(ev.gamma||0)*RAD;
@@ -104,6 +145,7 @@ async function ipsAttiva(){
   window.addEventListener('deviceorientation', onOrient, true);
 
   setTimeout(function(){
+    ipsDiag();
     if(IPS.src===null){
       err.hidden=false;
       err.innerHTML='<b>Nessun dato dai sensori.</b> Il dispositivo potrebbe non avere un accelerometro, '+
@@ -118,6 +160,22 @@ async function ipsAttiva(){
 
   /* il mirino serve proprio adesso: si accende da solo */
   if($('camOn') && $('camOn').checked && typeof camAccendi==='function') camAccendi();
+}
+
+/* verifica incrociata del segno: zn è a_z/|a| così come arriva */
+function ipsVerificaSegno(zn, m){
+  if(IPS.segnoCerto || !IPS.ori) return;
+  if(ora() - IPS.ori.t > 400) return;              /* orientamento troppo vecchio */
+  if(Math.abs(m - 9.81) > 1.5) return;             /* telefono in movimento brusco */
+  const ez = Math.cos(IPS.ori.b*RAD) * Math.cos(IPS.ori.g*RAD);   /* z atteso, specifica */
+  if(Math.abs(ez) < 0.4 || Math.abs(zn) < 0.4) return;            /* troppo vicino al verticale */
+  IPS.voti += (zn*ez > 0) ? 1 : -1;
+  if(IPS.voti >=  VOTI_SOGLIA){ IPS.segno =  1; IPS.segnoCerto = true; IPS.segnoDa = 'standard, verificato'; ipsDiag(); }
+  if(IPS.voti <= -VOTI_SOGLIA){ IPS.segno = -1; IPS.segnoCerto = true; IPS.segnoDa = 'iOS, verificato';      ipsDiag(); }
+}
+function ipsDiag(){
+  const d = $('ipsDiag'); if(!d) return;
+  d.textContent = 'Sensore: ' + (IPS.src || 'in attesa') + ' · convenzione asse z: ' + IPS.segnoDa;
 }
 
 /* ---------- filtro e buffer ---------- */

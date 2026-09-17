@@ -15,6 +15,16 @@ if('serviceWorker' in navigator && (location.protocol === 'https:' || location.h
   });
 }
 
+/* chiede al browser di non sgomberare da solo la memoria locale, dove
+   stanno i rilievi. Non cancella e non sposta nulla: se il browser dice
+   di no, tutto resta com'era. */
+try{
+  if(navigator.storage && navigator.storage.persist && navigator.storage.persisted){
+    navigator.storage.persisted().then(function(p){ if(!p) return navigator.storage.persist(); })
+      .catch(function(){});
+  }
+}catch(e){}
+
 /* pulsante di installazione su Android / desktop Chrome */
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', function(e){

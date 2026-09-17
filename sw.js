@@ -4,7 +4,7 @@
    installata non effettua alcuna richiesta di rete per funzionare.
    Le mattonelle cartografiche di OpenStreetMap, facoltative, sono di
    altra origine e vengono deliberatamente escluse dalla cache. */
-const CACHE = 'dendrocubo-v4.1.0';
+const CACHE = 'dendrocubo-v4.1.1';
 const SHELL = [
   './',
   './index.html',
@@ -25,7 +25,9 @@ self.addEventListener('install', function(e){
   e.waitUntil(
     caches.open(CACHE).then(function(c){
       return Promise.all(SHELL.map(function(u){
-        return c.add(u).catch(function(err){
+        /* cache:'reload' scavalca la cache HTTP del browser: senza, dopo un
+           aggiornamento si rischia di rimettere in cache il file vecchio */
+        return c.add(new Request(u, {cache:'reload'})).catch(function(err){
           console.warn('[sw] non messo in cache:', u, err && err.message);
         });
       }));

@@ -13,6 +13,7 @@
    casi il <video> resta lì fermo senza dire niente. Qui si sorveglia
    il flusso e lo si rimette in moto da solo. */
 let camStream = null, camGuardia = null, camVeglia = null, camUltimoT = -1;
+let camAvvio = false, camMuteT = null;   /* accensione in corso; attesa dopo un «mute» */
 
 /* lo schermo non deve spegnersi mentre stai mirando */
 async function camTieniAcceso(){
@@ -56,6 +57,9 @@ function camRiavvia(){
 }
 
 async function camAccendi(){
+  /* due accensioni sovrapposte (scheda + inclinometro + ritorno in primo
+     piano) aprivano due flussi: su iPhone il secondo spegne il primo */
+  if(camStream || camAvvio) return;
   const err=$('camErr'); err.hidden=true;
   if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !secureOk()){
     err.hidden=false;
@@ -63,6 +67,7 @@ async function camAccendi(){
       'fotocamera. Puoi mirare lungo il bordo superiore del telefono: il calcolo è identico.';
     $('camOn').checked=false; return;
   }
+  camAvvio = true;
   try{
     camStream = await navigator.mediaDevices.getUserMedia({
       video:{ facingMode:{ideal:'environment'}, width:{ideal:1280}, height:{ideal:720} }, audio:false });
@@ -72,9 +77,18 @@ async function camAccendi(){
     const tr = camStream.getVideoTracks()[0];
     if(tr){
       tr.addEventListener('ended', camRiavvia);
-      tr.addEventListener('mute',  camRiavvia);
+      /* iOS mette il flusso in «mute» per un attimo a ogni interruzione
+         (Centro di Controllo, notifica, chiamata): riavviare subito creava
+         un ciclo di accensioni. Si aspetta: se torna da solo, bene. */
+      tr.addEventListener('mute', function(){
+        clearTimeout(camMuteT);
+        camMuteT = setTimeout(function(){
+          if(camStream && camStream.getVideoTracks()[0]===tr && tr.muted) camRiavvia();
+        }, 2500);
+      });
+      tr.addEventListener('unmute', function(){ clearTimeout(camMuteT); });
     }
-    v.addEventListener('pause', function(){ if(camStream) v.play().catch(function(){}); });
+    v.onpause = function(){ if(camStream) v.play().catch(function(){}); };
     camSorveglia();
     camTieniAcceso();
   }catch(e){
@@ -84,10 +98,13 @@ async function camAccendi(){
       ? '<b>Permesso negato.</b> Autorizza la fotocamera dalle impostazioni del browser, oppure mira lungo '+
         'il bordo superiore del telefono: il risultato è lo stesso.'
       : '<b>Non è stato possibile aprire la fotocamera:</b> '+e.message;
+  }finally{
+    camAvvio = false;
   }
 }
 function camSpegni(){
   if(camGuardia){ clearInterval(camGuardia); camGuardia=null; }
+  clearTimeout(camMuteT);
   camLasciaSpegnere();
   if(camStream){ camStream.getTracks().forEach(function(t){ t.stop(); }); camStream=null; }
   const v=$('camVideo'); if(v) v.srcObject=null;
